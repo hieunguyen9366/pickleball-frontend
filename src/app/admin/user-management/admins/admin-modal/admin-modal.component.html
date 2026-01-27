@@ -1,0 +1,39 @@
+<div class="modal-header">
+  <h4 class="modal-title">{{ admin ? 'Chỉnh sửa' : 'Thêm mới' }} Quản trị viên</h4>
+  <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss()"></button>
+</div>
+<div class="modal-body">
+  <!-- Error Message -->
+  <div *ngIf="error" class="alert alert-danger mb-3">
+    {{ error }}
+  </div>
+
+  <form>
+    <div class="mb-3">
+      <label class="form-label">Họ tên <span class="text-danger">*</span></label>
+      <input type="text" class="form-control" [(ngModel)]="formData.fullName" name="fullName" placeholder="Nhập họ tên" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Email <span class="text-danger">*</span></label>
+      <input type="email" class="form-control" [(ngModel)]="formData.email" name="email" placeholder="Nhập email" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Số điện thoại</label>
+      <input type="text" class="form-control" [(ngModel)]="formData.phoneNumber" name="phoneNumber" placeholder="Nhập số điện thoại">
+    </div>
+    <div class="mb-3" *ngIf="!admin">
+        <label class="form-label">Mật khẩu <span class="text-danger">*</span></label>
+        <input type="password" class="form-control" [(ngModel)]="formData.password" name="password" placeholder="Nhập mật khẩu" required>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss()" [disabled]="isLoading">Hủy</button>
+  <button type="button" class="btn btn-primary" (click)="save()" [disabled]="isLoading">
+    <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+    Lưu
+  </button>
+</div>
+
+
+

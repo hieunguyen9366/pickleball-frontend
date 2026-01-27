@@ -1,0 +1,180 @@
+<div class="dynamic-pricing-page">
+  <div class="container-fluid">
+    <!-- Loading -->
+    <div class="row" *ngIf="isLoading && configs.length === 0">
+      <div class="col-12">
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+          </div>
+          <p class="text-muted mt-3 mb-0">Đang tải cấu hình giá...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div class="row" *ngIf="error && !isLoading">
+      <div class="col-12">
+        <div class="alert alert-danger">
+          {{ error }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="row" *ngIf="!isLoading || configs.length > 0">
+      <div class="col-12">
+        <app-card cardTitle="Cấu hình Giá theo Khung giờ" [padding]="0">
+          <ng-template #headerOptionsTemplate>
+            <div class="d-flex align-items-center gap-2">
+              <select class="form-select form-select-sm" [(ngModel)]="selectedCourtId"
+                (ngModelChange)="onFilterChange()" style="width: 250px;">
+                <option [ngValue]="undefined">Chọn sân để xem cấu hình</option>
+                <option *ngFor="let court of courts" [ngValue]="court.courtId">{{ court.courtName }}</option>
+              </select>
+              <button class="btn btn-primary" (click)="isEditing = true; initForm()"
+                *ngIf="!isEditing && selectedCourtId">
+                <i antIcon type="plus" theme="outline" class="me-1"></i> Thêm cấu hình
+              </button>
+            </div>
+          </ng-template>
+
+          <!-- Form Create/Edit -->
+          <div class="p-3 border-bottom" *ngIf="isEditing">
+            <form [formGroup]="pricingForm" (ngSubmit)="save()">
+              <div *ngIf="error" class="alert alert-danger mb-3">{{ error }}</div>
+
+              <!-- Court Selection -->
+              <div class="mb-3">
+                <label class="form-label">Sân <span class="text-danger">*</span></label>
+                <select class="form-select" formControlName="courtId" required>
+                  <option [ngValue]="undefined">Chọn sân</option>
+                  <option *ngFor="let court of courts" [ngValue]="court.courtId">
+                    {{ court.courtName }}
+                  </option>
+                </select>
+                <small class="text-muted">Cấu hình giá sẽ áp dụng cho sân này</small>
+              </div>
+
+              <!-- Time Range -->
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <label class="form-label">Giờ bắt đầu <span class="text-danger">*</span></label>
+                  <input type="time" class="form-control" formControlName="timeStart" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Giờ kết thúc <span class="text-danger">*</span></label>
+                  <input type="time" class="form-control" formControlName="timeEnd" required>
+                </div>
+              </div>
+
+              <!-- Days of Week -->
+              <div class="mb-3">
+                <label class="form-label">Áp dụng cho các ngày <span class="text-danger">*</span></label>
+                <div class="d-flex flex-wrap gap-2">
+                  <div class="form-check" *ngFor="let day of DAYS_OF_WEEK">
+                    <input class="form-check-input" type="checkbox" [checked]="isDaySelected(day.value)"
+                      (change)="toggleDay(day.value)" [id]="'day-' + day.value">
+                    <label class="form-check-label" [for]="'day-' + day.value">
+                      {{ day.label }}
+                    </label>
+                  </div>
+                </div>
+                <small class="text-muted">Chọn ít nhất một ngày trong tuần</small>
+              </div>
+
+              <!-- Price Modifier and Holiday -->
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <label class="form-label">Hệ số giá <span class="text-danger">*</span></label>
+                  <input type="number" class="form-control" formControlName="priceModifier" step="0.1" min="0.1"
+                    required>
+                  <small class="text-muted">
+                    VD: 1.2 = 120% giá cơ bản (giờ vàng), 0.8 = 80% giá cơ bản (giờ thấp điểm)
+                  </small>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Loại giá</label>
+                  <div class="form-check form-switch mt-2">
+                    <input class="form-check-input" type="checkbox" formControlName="isHoliday" id="isHoliday">
+                    <label class="form-check-label" for="isHoliday">
+                      Giá ngày lễ / Cuối tuần
+                    </label>
+                  </div>
+                  <small class="text-muted">Đánh dấu nếu đây là giá đặc biệt cho ngày lễ</small>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-secondary" (click)="cancelEdit()"
+                  [disabled]="isLoading">Hủy</button>
+                <button type="submit" class="btn btn-primary" [disabled]="isLoading || pricingForm.invalid">
+                  <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1" role="status"
+                    aria-hidden="true"></span>
+                  {{ isLoading ? 'Đang lưu...' : (isEditing && editingConfigId ? 'Cập nhật' : 'Tạo mới') }}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Config List -->
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Sân</th>
+                  <th>Khung giờ</th>
+                  <th>Ngày áp dụng</th>
+                  <th>Hệ số giá</th>
+                  <th>Loại</th>
+                  <th class="text-end">Hành động</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let config of configs">
+                  <td>#{{ config.configId }}</td>
+                  <td>
+                    <span class="badge bg-info">{{ getCourtName(config.courtId) }}</span>
+                  </td>
+                  <td>
+                    <i antIcon type="clock-circle" theme="outline" class="me-1"></i>
+                    {{ config.timeStart }} - {{ config.timeEnd }}
+                  </td>
+                  <td>
+                    <small>{{ formatDaysOfWeek(config.daysOfWeek) }}</small>
+                  </td>
+                  <td>
+                    <span [class]="getPriceModifierClass(config.priceModifier)">
+                      x{{ config.priceModifier }}
+                    </span>
+                  </td>
+                  <td>
+                    <span *ngIf="config.isHoliday" class="badge bg-warning">Ngày lễ</span>
+                    <span *ngIf="!config.isHoliday" class="badge bg-secondary">Thường</span>
+                  </td>
+                  <td class="text-end">
+                    <button class="btn btn-link-success btn-sm me-1" (click)="startEdit(config)" title="Chỉnh sửa">
+                      <i antIcon type="edit" theme="outline"></i>
+                    </button>
+                    <button class="btn btn-link-danger btn-sm" (click)="deleteConfig(config.courtId, config.configId!)"
+                      title="Xóa" *ngIf="config.configId">
+                      <i antIcon type="delete" theme="outline"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="configs.length === 0 && !isLoading && !isEditing">
+                  <td colspan="7" class="text-center py-3">
+                    {{ selectedCourtId ? 'Chưa có cấu hình giá nào cho sân này.' : 'Vui lòng chọn sân để xem cấu hình
+                    giá.' }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </app-card>
+      </div>
+    </div>
+  </div>
+</div>

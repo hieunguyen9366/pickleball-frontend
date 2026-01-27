@@ -1,0 +1,89 @@
+<div class="row">
+    <div class="col-sm-12">
+        <app-card cardTitle="Booking Management" [padding]="0">
+            <ng-template #headerOptionsTemplate>
+                <div class="d-flex align-items-center gap-2">
+                    <select class="form-select form-select-sm" [(ngModel)]="selectedStatus"
+                        (change)="onStatusFilterChange()">
+                        <option value="">Tất cả trạng thái</option>
+                        <option *ngFor="let s of bookingStatuses" [value]="s">{{ getStatusLabel(s) }}</option>
+                    </select>
+                    <!-- Removed "Tạo đặt sân" button - only players can create bookings -->
+                </div>
+            </ng-template>
+
+            <!-- Loading State -->
+            <div *ngIf="isLoading" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+                <p class="text-muted mt-3 mb-0">Đang tải danh sách đặt sân...</p>
+            </div>
+
+            <!-- Error Message -->
+            <div *ngIf="error && !isLoading" class="alert alert-danger m-3">
+                {{ error }}
+            </div>
+
+            <!-- Content -->
+            <div *ngIf="!isLoading" class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Mã</th>
+                            <th>Ngày</th>
+                            <th>Giờ</th>
+                            <th>Sân & Khách hàng</th> <!-- Combined for space -->
+                            <th>Số tiền</th>
+                            <th>Trạng thái</th>
+                            <th class="text-end">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of bookings">
+                            <td>#{{ item.bookingId }}</td>
+                            <td>{{ item.bookingDate }}</td>
+                            <td>{{ item.startTime }} - {{ item.endTime }}</td>
+                            <td>
+                                <h6 class="mb-0">{{ item.court?.courtName || 'Unknown Court' }}</h6>
+                                <small class="text-muted">User ID: {{ item.userId }}</small>
+                            </td>
+                            <td>{{ item.totalPrice | number }} ₫</td>
+                            <td>
+                                <span [class]="getStatusClass(item.status)">{{ getStatusLabel(item.status) }}</span>
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-link-primary btn-sm me-1" 
+                                        title="Xem chi tiết"
+                                        (click)="viewDetail(item.bookingId)">
+                                    <i antIcon type="eye" theme="outline"></i>
+                                </button>
+                                <button class="btn btn-link-info btn-sm me-1" 
+                                        *ngIf="isCheckInAvailable(item)"
+                                        title="Check-in"
+                                        (click)="checkIn(item)">
+                                    <i antIcon type="check" theme="outline"></i>
+                                </button>
+                                <span *ngIf="item.checkedInAt" class="badge bg-success me-1" title="Đã check-in">
+                                    <i antIcon type="check-circle" theme="fill"></i> Đã check-in
+                                </span>
+                                <button class="btn btn-link-success btn-sm me-1" *ngIf="item.status === 'PENDING'"
+                                    title="Xác nhận" (click)="updateStatus(item.bookingId, BookingStatus.CONFIRMED)">
+                                    <i antIcon type="check-circle" theme="outline"></i>
+                                </button>
+                                <button class="btn btn-link-danger btn-sm"
+                                    *ngIf="item.status !== 'CANCELLED' && item.status !== 'COMPLETED'" title="Hủy"
+                                    (click)="updateStatus(item.bookingId, BookingStatus.CANCELLED)">
+                                    <i antIcon type="close-circle" theme="outline"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr *ngIf="bookings.length === 0 && !isLoading">
+                            <td colspan="7" class="text-center p-4">Không tìm thấy lượt đặt sân nào.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </app-card>
+    </div>
+</div>

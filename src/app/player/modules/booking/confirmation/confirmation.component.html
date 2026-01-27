@@ -1,0 +1,102 @@
+<div class="confirmation-page">
+  <div class="container pb-5">
+
+    <!-- Loading -->
+    <div class="row" *ngIf="isLoading">
+      <div class="col-12 py-5 text-center">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted">Đang tải thông tin...</p>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div class="row" *ngIf="!isLoading && error">
+      <div class="col-12">
+        <div class="alert alert-danger text-center">{{ error }}</div>
+      </div>
+    </div>
+
+    <div class="row justify-content-center" *ngIf="!isLoading && !error && booking">
+      <div class="col-lg-6 col-md-8">
+
+        <div class="text-center mb-5 mt-4">
+          <div class="mb-3 d-inline-block rounded-circle bg-success-subtle p-4">
+            <i antIcon type="check-circle" theme="fill" class="display-3 text-success"></i>
+          </div>
+          <h2 class="fw-bold mb-2">Đặt sân thành công!</h2>
+          <p class="text-muted">Cảm ơn bạn đã đặt sân. Chúc bạn có một buổi chơi vui vẻ.</p>
+        </div>
+
+        <!-- Ticket Card -->
+        <div class="card border-0 shadow position-relative overflow-hidden confirmation-card">
+          <!-- Top decorative band -->
+          <div class="position-absolute top-0 start-0 w-100 bg-success" style="height: 6px;"></div>
+
+          <div class="card-body p-4 p-md-5">
+            <div class="text-center border-bottom pb-4 mb-4">
+              <h5 class="text-uppercase text-muted small fw-bold mb-1">Mã đặt sân</h5>
+              <h3 class="text-primary fw-bold mb-0">#{{ booking.bookingId }}</h3>
+            </div>
+
+            <div class="row gy-4 mb-4">
+              <div class="col-12">
+                <div class="d-flex align-items-center">
+                  <div class="rounded-circle bg-light p-3 me-3 text-primary">
+                    <i antIcon type="environment" theme="outline" class="fs-4"></i>
+                  </div>
+                  <div>
+                    <small class="text-muted d-block uppercase-label">Địa điểm</small>
+                    <h6 class="mb-0 fw-bold">{{ booking.court?.courtName }}</h6>
+                    <small class="text-muted text-truncate d-block" style="max-width: 250px;">{{ booking.court?.location
+                      }}</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-6">
+                <div class="d-flex align-items-center">
+                  <div class="rounded-circle bg-light p-3 me-3 text-success">
+                    <i antIcon type="calendar" theme="outline" class="fs-4"></i>
+                  </div>
+                  <div>
+                    <small class="text-muted d-block uppercase-label">Ngày</small>
+                    <h6 class="mb-0 fw-bold">{{ booking.bookingDate }}</h6>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-6">
+                <div class="d-flex align-items-center">
+                  <div class="rounded-circle bg-light p-3 me-3 text-warning">
+                    <i antIcon type="clock-circle" theme="outline" class="fs-4"></i>
+                  </div>
+                  <div>
+                    <small class="text-muted d-block uppercase-label">Giờ</small>
+                    <h6 class="mb-0 fw-bold">{{ booking.startTime }} - {{ booking.endTime }}</h6>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="alert bg-light border-0 d-flex justify-content-between align-items-center mb-0 px-4 py-3 rounded-3">
+              <span class="fw-semibold text-muted">Tổng thanh toán</span>
+              <span class="h4 mb-0 fw-bold text-success">{{ getFormattedPrice(booking.totalPrice) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-grid gap-2 mt-5">
+          <button class="btn btn-primary btn-lg shadow-sm" (click)="goToMyBookings()">
+            <i antIcon type="calendar" theme="outline" class="me-2"></i> xem lịch sử đặt sân của tôi
+          </button>
+          <button class="btn btn-outline-secondary btn-lg border-0" (click)="goToHome()">
+            Về trang chủ
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>

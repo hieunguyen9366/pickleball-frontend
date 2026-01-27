@@ -1,0 +1,136 @@
+<div class="booking-calendar-page">
+  <div class="container-fluid">
+    <!-- Loading -->
+    <div class="row" *ngIf="isLoading">
+      <div class="col-12">
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+          </div>
+          <p class="text-muted mt-3 mb-0">Đang tải lịch đặt sân...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div class="row" *ngIf="error && !isLoading">
+      <div class="col-12">
+        <div class="alert alert-danger">
+          {{ error }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="row" *ngIf="!isLoading">
+      <div class="col-12">
+        <app-card cardTitle="Lịch đặt sân" [padding]="0">
+          <ng-template #headerOptionsTemplate>
+            <div class="d-flex align-items-center gap-2">
+              <div class="btn-group" role="group">
+                <button type="button" class="btn btn-sm" 
+                        [class.btn-primary]="viewMode === 'week'"
+                        [class.btn-outline-primary]="viewMode !== 'week'"
+                        (click)="viewMode = 'week'; loadCalendar()">
+                  Tuần
+                </button>
+                <button type="button" class="btn btn-sm"
+                        [class.btn-primary]="viewMode === 'day'"
+                        [class.btn-outline-primary]="viewMode !== 'day'"
+                        (click)="viewMode = 'day'; loadCalendar()">
+                  Ngày
+                </button>
+              </div>
+              <button class="btn btn-sm btn-outline-secondary" (click)="goToToday()">
+                Hôm nay
+              </button>
+              <button class="btn btn-sm btn-outline-secondary" (click)="previousWeek()">
+                <i antIcon type="left" theme="outline"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-secondary" (click)="nextWeek()">
+                <i antIcon type="right" theme="outline"></i>
+              </button>
+              <span class="ms-2 fw-bold">
+                {{ currentDate | date:'MMMM yyyy' }}
+              </span>
+            </div>
+          </ng-template>
+
+          <div class="calendar-container p-3">
+            <!-- Week View -->
+            <div *ngIf="viewMode === 'week' && weeks.length > 0 && weeks[0].days" class="calendar-week">
+              <div class="calendar-header">
+                <div class="calendar-day-header" *ngFor="let day of weeks[0].days">
+                  <div class="fw-bold">{{ day.date | date:'EEE' }}</div>
+                  <div [class.text-primary]="day.isToday" [class.fw-bold]="day.isToday">
+                    {{ day.date | date:'d' }}
+                  </div>
+                </div>
+              </div>
+              <div class="calendar-body">
+                <div class="calendar-day" *ngFor="let day of weeks[0].days" 
+                     [class.today]="day.isToday"
+                     (click)="selectDate(day)">
+                  <div class="day-bookings">
+                    <div *ngFor="let booking of day.bookings" 
+                         class="booking-item"
+                         [class]="getStatusClass(booking.status)"
+                         (click)="viewDetail(booking.bookingId); $event.stopPropagation()">
+                      <div class="booking-time">{{ booking.startTime }} - {{ booking.endTime }}</div>
+                      <div class="booking-court">{{ booking.court?.courtName || 'N/A' }}</div>
+                      <div class="booking-status">{{ getStatusLabel(booking.status) }}</div>
+                    </div>
+                    <div *ngIf="day.bookings.length === 0" class="text-muted small text-center py-2">
+                      Không có đặt sân
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Day View -->
+            <div *ngIf="viewMode === 'day' && weeks.length > 0 && weeks[0].days && weeks[0].days.length > 0" class="calendar-day-view">
+              <div class="day-header mb-3">
+                <h5>{{ currentDate | date:'EEEE, dd MMMM yyyy' }}</h5>
+              </div>
+              <div class="day-bookings-list">
+                <div *ngFor="let booking of weeks[0].days[0].bookings" 
+                     class="card mb-2 booking-card"
+                     [class]="'border-' + getStatusClass(booking.status).replace('bg-', '')">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-md-2">
+                        <strong>{{ booking.startTime }} - {{ booking.endTime }}</strong>
+                      </div>
+                      <div class="col-md-4">
+                        <div>{{ booking.court?.courtName || 'N/A' }}</div>
+                        <small class="text-muted">Mã: #{{ booking.bookingId }}</small>
+                      </div>
+                      <div class="col-md-2">
+                        <span [class]="'badge ' + getStatusClass(booking.status)">
+                          {{ getStatusLabel(booking.status) }}
+                        </span>
+                      </div>
+                      <div class="col-md-2">
+                        <strong>{{ booking.totalPrice | number:'1.0-0' }} ₫</strong>
+                      </div>
+                      <div class="col-md-2 text-end">
+                        <button class="btn btn-sm btn-outline-primary" (click)="viewDetail(booking.bookingId)">
+                          <i antIcon type="eye" theme="outline" class="me-1"></i> Chi tiết
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="!weeks[0]?.days[0]?.bookings || weeks[0].days[0].bookings.length === 0" class="text-center py-5 text-muted">
+                  Không có đặt sân trong ngày này
+                </div>
+              </div>
+            </div>
+          </div>
+        </app-card>
+      </div>
+    </div>
+  </div>
+</div>
+

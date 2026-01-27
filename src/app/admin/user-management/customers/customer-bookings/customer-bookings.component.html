@@ -1,0 +1,79 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <app-card cardTitle="Lịch sử đặt sân" [padding]="0">
+        <ng-template #headerOptionsTemplate>
+          <button class="btn btn-link-primary btn-sm" (click)="goBack()">
+            <i antIcon type="arrow-left" theme="outline" class="me-1"></i> Quay lại
+          </button>
+        </ng-template>
+
+        <div *ngIf="customer" class="mb-3">
+          <h6 class="mb-1">Khách hàng: <strong>{{ customer.fullName }}</strong></h6>
+          <p class="text-muted mb-0">
+            Email: {{ customer.email }} | 
+            Số điện thoại: {{ customer.phoneNumber }}
+          </p>
+        </div>
+
+        <div *ngIf="error" class="alert alert-danger">
+          {{ error }}
+        </div>
+
+        <div *ngIf="isLoading" class="text-center py-5">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+
+        <div *ngIf="!isLoading && !error" class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Mã đặt</th>
+                <th>Ngày đặt</th>
+                <th>Khung giờ</th>
+                <th>Sân</th>
+                <th>Số tiền</th>
+                <th>Trạng thái</th>
+                <th class="text-end">Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let booking of bookings">
+                <td>#{{ booking.bookingId }}</td>
+                <td>{{ booking.bookingDate }}</td>
+                <td>
+                  <div>{{ booking.startTime }} - {{ booking.endTime }}</div>
+                </td>
+                <td>
+                  <div class="fw-bold">{{ booking.courtName }}</div>
+                  <small class="text-muted">{{ booking.courtGroupName }}</small>
+                </td>
+                <td>{{ booking.totalPrice | number }} ₫</td>
+                <td>
+                  <span [class]="getStatusClass(booking.status)">
+                    {{ getStatusLabel(booking.status) }}
+                  </span>
+                </td>
+                <td class="text-end">
+                  <button class="btn btn-link-primary btn-sm" 
+                          (click)="viewBookingDetail(booking.bookingId)"
+                          title="Xem chi tiết">
+                    <i antIcon type="eye" theme="outline"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="bookings.length === 0">
+                <td colspan="7" class="text-center py-3">
+                  Khách hàng chưa có lịch sử đặt sân nào.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </app-card>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,114 @@
+<div class="court-carousel-container">
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && (!courts || courts.length === 0)" class="text-center py-5">
+    <p class="text-muted">Không có sân nào phù hợp</p>
+  </div>
+
+  <div *ngIf="!isLoading && courts && courts.length > 0" class="carousel-wrapper">
+    <!-- Navigation Arrow Left -->
+    <button 
+      class="carousel-nav carousel-nav-prev" 
+      (click)="prevSlide()"
+      [disabled]="currentIndex === 0"
+      [class.disabled]="currentIndex === 0">
+      <i antIcon type="left" theme="outline"></i>
+    </button>
+
+    <!-- Carousel Content -->
+    <div class="carousel-content">
+      <div class="row g-3">
+        <div class="col-lg-3 col-md-4 col-sm-6" *ngFor="let court of getCurrentCourts()">
+          <div class="court-card card shadow-sm border-0 h-100">
+            <!-- Image with Status Badge -->
+            <div class="court-image-wrapper">
+              <img [src]="getCourtImage(court)" [alt]="court.courtName" class="court-image">
+              <div class="court-status-badge" [ngClass]="getStatusBadgeClass(court.status)">
+                {{ getStatusBadgeText(court.status) }}
+              </div>
+            </div>
+
+            <div class="card-body">
+              <!-- Rating -->
+              <div class="court-rating mb-2" *ngIf="court.rating !== undefined">
+                <span class="rating-value">{{ court.rating }}</span>
+                <span class="rating-stars">
+                  <i 
+                    *ngFor="let filled of getStars(court.rating); let i = index" 
+                    antIcon 
+                    [type]="filled ? 'star-fill' : 'star'" 
+                    [theme]="filled ? 'fill' : 'outline'"
+                    class="star-icon">
+                  </i>
+                </span>
+                <span class="review-count" *ngIf="court.reviewCount">
+                  {{ court.reviewCount }} đánh giá
+                </span>
+              </div>
+
+              <!-- Court Name -->
+              <h6 class="court-name mb-2">{{ court.courtName }}</h6>
+
+              <!-- Address -->
+              <div class="court-info mb-2">
+                <i antIcon type="environment" theme="outline" class="info-icon"></i>
+                <span class="info-text">{{ court.location }}</span>
+              </div>
+
+              <!-- Phone -->
+              <div class="court-info mb-2" *ngIf="court.phone">
+                <i antIcon type="phone" theme="outline" class="info-icon"></i>
+                <span class="info-text">{{ court.phone }}</span>
+              </div>
+
+              <!-- Services/Amenities -->
+              <div class="court-services mb-3" *ngIf="court.amenities && court.amenities.length > 0">
+                <div class="services-label">Liên hệ: Dịch vụ:</div>
+                <div class="services-icons">
+                  <span class="service-icon" *ngFor="let amenity of court.amenities.slice(0, 5)">
+                    {{ amenity }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Price -->
+              <div class="court-price mb-3">
+                <span class="price-label">Từ</span>
+                <span class="price-value">{{ court.pricePerHour | number }}₫</span>
+              </div>
+
+              <!-- View Details Button -->
+              <a [routerLink]="['/player/court-detail', court.courtId]" class="btn btn-primary btn-sm w-100">
+                <i antIcon type="eye" theme="outline" class="me-1"></i>
+                Xem chi tiết
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Arrow Right -->
+    <button 
+      class="carousel-nav carousel-nav-next" 
+      (click)="nextSlide()"
+      [disabled]="currentIndex >= totalPages - 1"
+      [class.disabled]="currentIndex >= totalPages - 1">
+      <i antIcon type="right" theme="outline"></i>
+    </button>
+  </div>
+
+  <!-- Pagination Dots -->
+  <div class="carousel-pagination" *ngIf="totalPages > 1">
+    <button
+      *ngFor="let page of [].constructor(totalPages); let i = index"
+      class="pagination-dot"
+      [class.active]="i === currentIndex"
+      (click)="goToPage(i)"
+      [attr.aria-label]="'Go to page ' + (i + 1)">
+    </button>
+  </div>
+</div>

@@ -1,0 +1,13 @@
+.b-brand {
+    text-decoration: none;
+
+    h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: bold;
+        background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-info) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+}

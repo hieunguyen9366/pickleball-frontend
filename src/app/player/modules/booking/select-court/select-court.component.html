@@ -1,0 +1,208 @@
+<div class="select-court-page">
+  <div class="container pb-5">
+
+    <!-- Stepper -->
+    <div class="row mb-5">
+      <div class="col-12">
+        <div class="position-relative d-flex justify-content-between text-center mx-auto" style="max-width: 600px;">
+          <!-- Line -->
+          <div class="position-absolute top-50 start-0 translate-middle-y w-100 bg-light rounded"
+            style="height: 4px; z-index: 0;"></div>
+          <!-- Progress: 0% since we are at step 1 -->
+          <div class="position-absolute top-50 start-0 translate-middle-y bg-success rounded transition-width"
+            style="height: 4px; z-index: 0; width: 0%;"></div>
+
+          <!-- Step 1 (Active) -->
+          <div class="position-relative z-1">
+            <div
+              class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-2 shadow"
+              style="width: 40px; height: 40px;">
+              <span class="fw-bold">1</span>
+            </div>
+            <small class="fw-bold text-primary">Chọn sân</small>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="position-relative z-1">
+            <div
+              class="rounded-circle bg-light text-secondary d-flex align-items-center justify-content-center mx-auto mb-2 border"
+              style="width: 40px; height: 40px;">
+              <span class="fw-bold">2</span>
+            </div>
+            <small class="text-secondary">Dịch vụ</small>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="position-relative z-1">
+            <div
+              class="rounded-circle bg-light text-secondary d-flex align-items-center justify-content-center mx-auto mb-2 border"
+              style="width: 40px; height: 40px;">
+              <span class="fw-bold">3</span>
+            </div>
+            <small class="text-secondary">Thanh toán</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Booking Timer -->
+    <div class="row mb-3" *ngIf="bookingTimerState.isActive">
+      <div class="col-12">
+        <div class="alert d-flex align-items-center justify-content-between mb-0"
+             [class.alert-warning]="bookingTimerState.remainingSeconds >= 60"
+             [class.alert-danger]="bookingTimerState.remainingSeconds < 60">
+          <div class="d-flex align-items-center">
+            <i antIcon type="clock-circle" theme="outline" class="me-2 fs-5"></i>
+            <div>
+              <strong>Thời gian hoàn tất đặt sân:</strong>
+              <span class="fw-bold fs-4 ms-2">{{ getBookingTimerText() }}</span>
+            </div>
+          </div>
+          <small class="text-muted" *ngIf="bookingTimerState.remainingSeconds < 60">
+            ⚠️ Sắp hết thời gian!
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-12">
+        <h3 class="fw-bold">Chọn thời gian đặt sân</h3>
+        <p class="text-muted">Vui lòng chọn ngày và khung giờ bạn muốn chơi.</p>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div class="row" *ngIf="error">
+      <div class="col-12">
+        <div class="alert alert-danger">
+          <i antIcon type="exclamation-circle" theme="outline" class="me-2"></i> {{ error }}
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4" *ngIf="selectedCourt">
+      <!-- Loft Column: Court Info -->
+      <div class="col-lg-4">
+        <app-card [showHeader]="false" blockClass="h-100 shadow-sm border-0">
+          <div class="text-center mb-3">
+            <img
+              [src]="selectedCourt.images && selectedCourt.images.length ? selectedCourt.images[0] : 'assets/images/index.jpg'"
+              class="img-fluid rounded mb-3 object-fit-cover w-100" style="height: 200px;" alt="Court Image">
+            <h5 class="fw-bold mb-1">{{ selectedCourt.courtName }}</h5>
+            <p class="text-muted small mb-2"><i antIcon type="environment" theme="outline" class="me-1"></i>{{
+              selectedCourt.location }}</p>
+
+            <div class="d-flex justify-content-center align-items-center gap-2 mb-3">
+              <span class="badge bg-warning text-dark"><i antIcon type="star" theme="fill" class="me-1"></i>{{
+                selectedCourt.rating || 0 }}</span>
+              <span class="text-muted small">({{ selectedCourt.reviewCount || 0 }} đánh giá)</span>
+            </div>
+          </div>
+
+          <hr class="opacity-25">
+
+          <div class="mb-3">
+            <small class="text-uppercase text-muted fw-bold mb-2 d-block" style="font-size: 0.75rem;">Tiện ích</small>
+            <div class="d-flex flex-wrap gap-1">
+              <span class="badge bg-light text-secondary fw-normal border" *ngFor="let am of selectedCourt.amenities">{{
+                am }}</span>
+            </div>
+          </div>
+
+          <div class="mt-auto">
+            <div class="bg-primary-subtle p-3 rounded text-center">
+              <small class="text-primary fw-bold text-uppercase">Giá thuê</small>
+              <div class="text-primary fw-bold fs-4">{{ selectedCourt.pricePerHour | number:'1.0-0' }}đ<small
+                  class="fs-6 text-muted fw-normal">/giờ</small></div>
+            </div>
+          </div>
+        </app-card>
+      </div>
+
+      <!-- Right Column: Date & Time Selection -->
+      <div class="col-lg-8">
+        <app-card [showHeader]="false" blockClass="h-100 shadow-sm border-0">
+          <!-- Date Picker -->
+          <div class="mb-4">
+            <label class="form-label fw-bold">Ngày chơi</label>
+            <input type="date" class="form-control form-control-lg" [value]="selectedDate"
+              (change)="onDateChange($event)" [min]="getTodayDate()">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold d-flex justify-content-between align-items-center">
+              <span>Chọn khung giờ</span>
+              <div class="d-flex gap-3 small fw-normal">
+                <div class="d-flex align-items-center gap-1">
+                  <div class="rounded border bg-white" style="width: 16px; height: 16px;"></div> Trống
+                </div>
+                <div class="d-flex align-items-center gap-1">
+                  <div class="rounded bg-primary text-white border-primary" style="width: 16px; height: 16px;"></div>
+                  Đang chọn
+                </div>
+                <div class="d-flex align-items-center gap-1">
+                  <div class="rounded bg-warning border-warning" style="width: 16px; height: 16px;"></div>
+                  Đang giữ
+                </div>
+                <div class="d-flex align-items-center gap-1">
+                  <div class="rounded bg-secondary opacity-25" style="width: 16px; height: 16px;"></div> Đã đặt
+                </div>
+              </div>
+            </label>
+
+            <!-- Loading -->
+            <div *ngIf="isLoading" class="text-center py-5">
+              <div class="spinner-border text-primary" role="status"></div>
+              <p class="mt-2 text-muted">Đang kiểm tra lịch trống...</p>
+            </div>
+
+            <!-- Time Grid -->
+            <div class="row g-2" *ngIf="!isLoading">
+              <div class="col-6 col-sm-4 col-md-3" *ngFor="let slot of timeSlots">
+                <button type="button"
+                  class="btn w-100 py-2 position-relative d-flex flex-column align-items-center justify-content-center"
+                  [class.btn-outline-secondary]="!slot.selected && slot.available && !slot.locked"
+                  [class.btn-primary]="slot.selected"
+                  [class.btn-warning]="slot.locked && slot.isLockedByMe"
+                  [class.btn-light]="!slot.available || (slot.locked && !slot.isLockedByMe)"
+                  [class.text-muted]="!slot.available || (slot.locked && !slot.isLockedByMe)"
+                  [disabled]="!slot.available || (slot.locked && !slot.isLockedByMe)"
+                  (click)="toggleSlot(slot)">
+                  <span class="fw-bold">{{ slot.time }} - {{ slot.endTime }}</span>
+                  <small *ngIf="slot.available && !(slot.locked && !slot.isLockedByMe)" style="font-size: 0.7rem;">{{ slot.price | number:'1.0-0' }}đ</small>
+                  <small *ngIf="slot.locked && slot.isLockedByMe" class="text-warning-emphasis" style="font-size: 0.7rem;">Đang giữ</small>
+                  <small *ngIf="slot.locked && !slot.isLockedByMe" class="text-muted" style="font-size: 0.7rem;">Đã giữ</small>
+                  <i *ngIf="slot.selected" antIcon type="check-circle" theme="fill"
+                    class="position-absolute top-0 end-0 m-1"></i>
+                </button>
+              </div>
+            </div>
+            <div *ngIf="!isLoading && timeSlots.length === 0" class="text-center py-4 text-muted">
+              Không có lịch trống cho ngày này.
+            </div>
+          </div>
+
+
+          <!-- Footer Actions -->
+          <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-4">
+            <div>
+              <div class="text-muted small">Tổng thời gian</div>
+              <div class="fw-bold">{{ getDuration() }} giờ</div>
+            </div>
+            <div class="text-end me-3">
+              <div class="text-muted small">Tạm tính</div>
+              <div class="fw-bold text-primary fs-5">{{ getTotalPrice() | number:'1.0-0' }}đ</div>
+            </div>
+            <button class="btn btn-primary px-4 py-2" 
+              [disabled]="selectedSlots.length === 0 || isReserving"
+              (click)="continueBooking()">
+              <span *ngIf="isReserving" class="spinner-border spinner-border-sm me-2"></span>
+              Tiếp tục <i antIcon type="arrow-right" theme="outline" class="ms-1"></i>
+            </button>
+          </div>
+        </app-card>
+      </div>
+    </div>
+  </div>
+</div>

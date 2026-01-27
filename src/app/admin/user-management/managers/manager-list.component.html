@@ -1,0 +1,79 @@
+<div class="manager-list-page">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <app-card cardTitle="Danh sách Quản lý Sân" [padding]="0">
+          <ng-template #headerOptionsTemplate>
+            <button class="btn btn-primary" [routerLink]="['/admin/user-management/managers/create']">
+              <i antIcon type="plus" theme="outline" class="me-1"></i> Thêm Manager
+            </button>
+          </ng-template>
+          
+          <!-- Loading State -->
+          <div *ngIf="isLoading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Đang tải...</span>
+            </div>
+            <p class="text-muted mt-3 mb-0">Đang tải danh sách quản lý...</p>
+          </div>
+
+          <!-- Content -->
+          <div *ngIf="!isLoading" class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Họ tên</th>
+                  <th>Email</th>
+                  <th>Số điện thoại</th>
+                  <th>Ngày tạo</th>
+                  <th class="text-end">Hành động</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let manager of managers">
+                  <td>#{{ manager.userId }}</td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <img src="assets/images/user/avatar-2.jpg" alt="user-image" class="user-avatar wid-35 rounded-circle" />
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0">{{ manager.fullName }}</h6>
+                        </div>
+                    </div>
+                  </td>
+                  <td>{{ manager.email }}</td>
+                  <td>{{ manager.phoneNumber }}</td>
+                  <td>{{ manager.createdAt | date:'dd/MM/yyyy' }}</td>
+                  <td class="text-end">
+                    <button class="btn btn-link-primary btn-sm me-1" 
+                            [routerLink]="['/admin/user-management/managers', manager.userId, 'assignment']"
+                            title="Phân quyền">
+                      <i antIcon type="safety-certificate" theme="outline"></i>
+                    </button>
+                    <button class="btn btn-link-warning btn-sm me-1" 
+                            (click)="resetPassword(manager)" 
+                            title="Cấp lại mật khẩu">
+                      <i antIcon type="key" theme="outline"></i>
+                    </button>
+                    <button class="btn btn-link-success btn-sm me-1" (click)="openModal(manager)" title="Chỉnh sửa">
+                      <i antIcon type="edit" theme="outline"></i>
+                    </button>
+                    <button class="btn btn-link-danger btn-sm" (click)="deleteManager(manager.userId!)" title="Xóa">
+                      <i antIcon type="delete" theme="outline"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="managers.length === 0">
+                    <td colspan="6" class="text-center py-3">Chưa có quản lý nào.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </app-card>
+      </div>
+    </div>
+  </div>
+</div>
+

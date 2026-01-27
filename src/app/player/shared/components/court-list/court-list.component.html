@@ -1,0 +1,44 @@
+<div class="court-list-container">
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Đang tải...</span>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && courts.length === 0" class="text-center py-5">
+    <p class="text-muted">Không có sân nào</p>
+  </div>
+
+  <div class="row g-4" *ngIf="!isLoading && courts.length > 0">
+    <div class="col-lg-4 col-md-6" *ngFor="let court of courts">
+      <div class="court-card card shadow-sm border-0 h-100">
+        <div class="court-image-wrapper">
+          <img [src]="getCourtImage(court)" [alt]="court.courtName" class="court-image">
+          <div class="court-status-badge" [class.available]="court.status === 'AVAILABLE'">
+            <span class="badge" [class.bg-success]="court.status === 'AVAILABLE'" [class.bg-danger]="court.status !== 'AVAILABLE'">
+              {{ court.status === 'AVAILABLE' ? 'Còn trống' : 'Đã đặt' }}
+            </span>
+          </div>
+        </div>
+        <div class="card-body">
+          <h5 class="card-title f-w-600 mb-3">{{ court.courtName }}</h5>
+          <p class="text-muted mb-3">
+            <i antIcon type="environment" theme="outline" class="me-2 f-14"></i>
+            {{ court.location }}
+          </p>
+          <div class="court-info mb-3">
+            <div class="price-info">
+              <span class="text-muted f-12">Giá:</span>
+              <span class="price-value text-primary f-w-600 f-18">{{ court.pricePerHour | number }}đ/giờ</span>
+            </div>
+          </div>
+          <a [routerLink]="['/player/court-detail', court.courtId]" class="btn btn-primary w-100">
+            <i antIcon type="eye" theme="outline" class="me-2"></i>
+            Xem chi tiết
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

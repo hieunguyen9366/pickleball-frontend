@@ -1,0 +1,206 @@
+<div class="select-services-page">
+  <div class="container pb-5">
+
+    <!-- Stepper -->
+    <div class="row mb-5">
+      <div class="col-12">
+        <div class="position-relative d-flex justify-content-between text-center mx-auto" style="max-width: 600px;">
+          <!-- Line -->
+          <div class="position-absolute top-50 start-0 translate-middle-y w-100 bg-light rounded"
+            style="height: 4px; z-index: 0;"></div>
+          <div class="position-absolute top-50 start-0 translate-middle-y bg-success rounded transition-width"
+            style="height: 4px; z-index: 0; width: 50%;"></div>
+
+          <!-- Step 1 -->
+          <div class="position-relative z-1">
+            <div
+              class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center mx-auto mb-2 shadow-sm"
+              style="width: 40px; height: 40px;">
+              <i antIcon type="check" theme="outline"></i>
+            </div>
+            <small class="fw-bold text-success">Chọn sân</small>
+          </div>
+
+          <!-- Step 2 (Active) -->
+          <div class="position-relative z-1">
+            <div
+              class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-2 shadow"
+              style="width: 40px; height: 40px;">
+              <span class="fw-bold">2</span>
+            </div>
+            <small class="fw-bold text-primary">Dịch vụ</small>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="position-relative z-1">
+            <div
+              class="rounded-circle bg-light text-secondary d-flex align-items-center justify-content-center mx-auto mb-2 border"
+              style="width: 40px; height: 40px;">
+              <span class="fw-bold">3</span>
+            </div>
+            <small class="text-secondary">Thanh toán</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Booking Timer -->
+    <div class="row mb-3" *ngIf="bookingTimerState.isActive">
+      <div class="col-12">
+        <div class="alert d-flex align-items-center justify-content-between mb-0"
+             [class.alert-warning]="bookingTimerState.remainingSeconds >= 60"
+             [class.alert-danger]="bookingTimerState.remainingSeconds < 60">
+          <div class="d-flex align-items-center">
+            <i antIcon type="clock-circle" theme="outline" class="me-2 fs-5"></i>
+            <div>
+              <strong>Thời gian hoàn tất đặt sân:</strong>
+              <span class="fw-bold fs-4 ms-2">{{ getBookingTimerText() }}</span>
+            </div>
+          </div>
+          <small class="text-muted" *ngIf="bookingTimerState.remainingSeconds < 60">
+            ⚠️ Sắp hết thời gian!
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12 pb-3">
+        <h3 class="fw-bold">Chọn dịch vụ đi kèm</h3>
+        <p class="text-muted">Thêm nước uống, thuê vợt hoặc các dịch vụ khác cho buổi chơi của bạn.</p>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- Left Column: Services -->
+      <div class="col-lg-8">
+
+        <!-- Loading -->
+        <div *ngIf="isLoading" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="mt-2 text-muted">Đang tải dịch vụ...</p>
+        </div>
+
+        <!-- Error -->
+        <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+        <!-- Services List -->
+        <div class="row g-3" *ngIf="!isLoading && services.length > 0">
+          <div class="col-md-6" *ngFor="let service of services">
+            <div class="card h-100 border-0 shadow-sm service-card" [class.border-primary]="getQuantity(service) > 0"
+              [class.border]="getQuantity(service) > 0">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <div>
+                    <h6 class="fw-bold mb-1">{{ service.serviceName }}</h6>
+                    <div class="text-primary fw-bold">{{ service.price | number:'1.0-0' }}đ <small
+                        class="text-muted fw-normal">/ {{ service.unit }}</small></div>
+                  </div>
+                  <div class="rounded-circle bg-light p-2 text-primary" *ngIf="getQuantity(service) > 0">
+                    <i antIcon type="check" theme="outline"></i>
+                  </div>
+                </div>
+                <p class="text-muted small mb-3">{{ service.description }}</p>
+
+                <div class="d-flex align-items-center justify-content-between mt-auto">
+                  <span class="small text-muted" *ngIf="getQuantity(service) > 0">
+                    Thành tiền: <span class="fw-bold text-dark">{{ getServiceTotal(service) | number:'1.0-0' }}đ</span>
+                  </span>
+                  <span *ngIf="getQuantity(service) === 0"></span>
+
+                  <div class="btn-group shadow-sm" role="group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary px-2"
+                      (click)="changeQuantity(service, -1)" [disabled]="getQuantity(service) === 0">
+                      <i antIcon type="minus" theme="outline"></i>
+                    </button>
+                    <div class="btn btn-sm btn-white border-top border-bottom px-3 fw-bold d-flex align-items-center">
+                      {{ getQuantity(service) }}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-primary px-2"
+                      (click)="changeQuantity(service, 1)">
+                      <i antIcon type="plus" theme="outline"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!isLoading && !error && services.length === 0" class="text-center py-5">
+          <p class="text-muted">Không có dịch vụ nào khả dụng.</p>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Summary (Sticky) -->
+      <div class="col-lg-4">
+        <div class="sticky-top" style="top: 20px;">
+          <app-card [showHeader]="false" blockClass="summary-card shadow-sm border-0">
+            <h5 class="fw-bold mb-3">Tóm tắt đặt sân</h5>
+
+            <!-- Court Info -->
+            <div class="bg-light rounded p-3 mb-3">
+              <h6 class="mb-1 fw-bold text-primary">{{ selectedCourt?.courtName }}</h6>
+              <p class="mb-2 text-muted small"><i antIcon type="environment" theme="outline" class="me-1"></i>{{
+                selectedCourt?.location }}</p>
+              <hr class="my-2 opacity-50">
+              <div class="d-flex justify-content-between small mb-1">
+                <span class="text-muted">Ngày:</span>
+                <span class="fw-semibold">{{ bookingDate }}</span>
+              </div>
+              <div class="d-flex justify-content-between small">
+                <span class="text-muted">Giờ:</span>
+                <span class="fw-semibold">{{ startTime }} - {{ endTime }}</span>
+              </div>
+            </div>
+
+            <!-- Services Summary -->
+            <div *ngIf="selectedServices.length > 0" class="mb-3">
+              <h6 class="small fw-bold text-muted text-uppercase mb-2">Dịch vụ đã chọn</h6>
+              <div class="d-flex justify-content-between align-items-center mb-2 small"
+                *ngFor="let item of selectedServices">
+                <span>{{ item.service.serviceName }} <span class="text-muted">x{{ item.quantity }}</span></span>
+                <span class="fw-semibold">{{ item.quantity * item.service.price | number:'1.0-0' }}đ</span>
+              </div>
+              <hr class="my-2 opacity-25">
+            </div>
+
+            <!-- Price Breakdown -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2 small">
+                <span class="text-muted">Tiền sân</span>
+                <span class="fw-semibold">{{ totalCourtPrice | number:'1.0-0' }}đ</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2 small"
+                *ngIf="getTotalServicesPrice() > 0">
+                <span class="text-muted">Dịch vụ</span>
+                <span class="fw-semibold">{{ getTotalServicesPrice() | number:'1.0-0' }}đ</span>
+              </div>
+            </div>
+
+            <hr class="my-3">
+
+            <!-- Total -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <span class="text-muted fw-bold">Tổng thanh toán</span>
+              <span class="h4 mb-0 text-primary">{{ getTotalBookingPrice() | number:'1.0-0' }}đ</span>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-grid gap-2">
+              <button class="btn btn-primary py-2" (click)="goToPayment()">
+                Tiếp tục <i antIcon type="arrow-right" theme="outline" class="ms-1"></i>
+              </button>
+              <a class="btn btn-outline-secondary py-2" [routerLink]="['/player/booking/select-court']">
+                Quay lại
+              </a>
+            </div>
+
+          </app-card>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,128 @@
+<div class="manager-assignment-page">
+  <div class="container-fluid">
+    <!-- Loading -->
+    <div class="row" *ngIf="isLoading && !data">
+      <div class="col-12">
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+          </div>
+          <p class="text-muted mt-3 mb-0">Đang tải thông tin phân quyền...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div class="row" *ngIf="error && !isLoading">
+      <div class="col-12">
+        <div class="alert alert-danger">
+          {{ error }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="row" *ngIf="!isLoading && data">
+      <div class="col-12">
+        <app-card cardTitle="Phân quyền Cụm sân cho Quản lý" [padding]="0">
+          <ng-template #headerOptionsTemplate>
+            <button class="btn btn-secondary me-2" (click)="cancel()">
+              <i antIcon type="close" theme="outline" class="me-1"></i> Hủy
+            </button>
+            <button class="btn btn-primary" (click)="save()" [disabled]="isLoading">
+              <i antIcon type="save" theme="outline" class="me-1"></i> Lưu
+            </button>
+          </ng-template>
+
+          <div class="p-3">
+            <!-- Manager Info -->
+            <div class="mb-4">
+              <h5 class="mb-3">Thông tin Quản lý</h5>
+              <div class="card bg-light">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <p class="mb-2"><strong>Họ tên:</strong> {{ data.manager.fullName }}</p>
+                      <p class="mb-2"><strong>Email:</strong> {{ data.manager.email }}</p>
+                    </div>
+                    <div class="col-md-6">
+                      <p class="mb-2"><strong>Số điện thoại:</strong> {{ data.manager.phoneNumber || 'N/A' }}</p>
+                      <p class="mb-0"><strong>Ngày tạo:</strong> {{ data.manager.createdAt | date:'dd/MM/yyyy' }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Assigned Court Groups -->
+            <div class="mb-4" *ngIf="data.assignedCourtGroups.length > 0">
+              <h5 class="mb-3">Cụm sân đã được gán ({{ data.assignedCourtGroups.length }})</h5>
+              <div class="list-group">
+                <div class="list-group-item d-flex justify-content-between align-items-center" 
+                     *ngFor="let group of data.assignedCourtGroups">
+                  <div class="flex-grow-1">
+                    <h6 class="mb-1">{{ group.courtGroupName }}</h6>
+                    <p class="mb-0 text-muted small">
+                      <i antIcon type="environment" theme="outline" class="me-1"></i>
+                      {{ group.address }}, {{ group.district }}, {{ group.city }}
+                    </p>
+                  </div>
+                  <div class="form-check form-switch ms-3">
+                    <input class="form-check-input" type="checkbox" 
+                           [checked]="isGroupSelected(group.courtGroupId)"
+                           (change)="toggleGroupSelection(group.courtGroupId)"
+                           id="assigned-{{ group.courtGroupId }}">
+                    <label class="form-check-label" for="assigned-{{ group.courtGroupId }}">
+                      <span class="badge bg-success">Đã gán</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Available Court Groups -->
+            <div class="mb-4" *ngIf="data.availableCourtGroups.length > 0">
+              <h5 class="mb-3">Cụm sân chưa được gán ({{ data.availableCourtGroups.length }})</h5>
+              <div class="list-group">
+                <div class="list-group-item d-flex justify-content-between align-items-center" 
+                     *ngFor="let group of data.availableCourtGroups">
+                  <div class="flex-grow-1">
+                    <h6 class="mb-1">{{ group.courtGroupName }}</h6>
+                    <p class="mb-0 text-muted small">
+                      <i antIcon type="environment" theme="outline" class="me-1"></i>
+                      {{ group.address }}, {{ group.district }}, {{ group.city }}
+                    </p>
+                  </div>
+                  <div class="form-check form-switch ms-3">
+                    <input class="form-check-input" type="checkbox" 
+                           [checked]="isGroupSelected(group.courtGroupId)"
+                           (change)="toggleGroupSelection(group.courtGroupId)"
+                           id="available-{{ group.courtGroupId }}">
+                    <label class="form-check-label" for="available-{{ group.courtGroupId }}">
+                      <span class="badge bg-secondary">Chưa gán</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty State -->
+            <div class="text-center py-5" *ngIf="data.assignedCourtGroups.length === 0 && data.availableCourtGroups.length === 0">
+              <p class="text-muted">Chưa có cụm sân nào trong hệ thống.</p>
+            </div>
+
+            <!-- Summary -->
+            <div class="mt-4 pt-3 border-top" *ngIf="selectedGroupIds.length > 0">
+              <p class="mb-0 text-muted">
+                <strong>Tổng số cụm sân sẽ được gán:</strong> {{ selectedGroupIds.length }}
+              </p>
+            </div>
+          </div>
+        </app-card>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+

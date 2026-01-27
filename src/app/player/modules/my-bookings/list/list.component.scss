@@ -1,0 +1,73 @@
+// Using global CSS custom properties instead of SCSS variables
+// These are provided by the global styles.scss
+
+.my-bookings-page {
+  padding: 2rem 0;
+  min-height: calc(100vh - 200px);
+  background-color: var(--bs-body-bg);
+
+  .container {
+    max-width: 1200px;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--pc-heading-color);
+      margin-bottom: 0;
+      display: flex;
+      align-items: center;
+
+      i {
+        font-size: 1.5rem;
+        color: var(--bs-primary);
+        margin-right: 0.5rem;
+      }
+    }
+  }
+}
+
+// Avatar with icon
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+
+  &.avatar-s {
+    width: 40px;
+    height: 40px;
+  }
+
+  i {
+    color: white;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .my-bookings-page {
+    padding: 1rem 0;
+
+    .page-header {
+      .page-title {
+        font-size: 1.5rem;
+      }
+    }
+
+  .booking-card {
+    height: 100%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+  }
+  }
+}

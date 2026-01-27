@@ -1,0 +1,52 @@
+<ul class="list-unstyled">
+  <li class="dropdown pc-h-item" ngbDropdown>
+    <a href="javascript:" class="pc-head-link dropdown-toggle arrow-none me-0 bg-gray-200" data-bs-toggle="dropdown"
+      ngbDropdownToggle>
+      <i antIcon type="bell" theme="outline"></i>
+      <span class="badge bg-primary pc-h-badge">3</span>
+    </a>
+    <div class="dropdown-menu dropdown-notification dropdown-menu-end pc-h-dropdown" ngbDropdownMenu>
+      <div class="dropdown-header d-flex align-items-center justify-content-between">
+        <h5 class="m-0">Thông báo</h5>
+        <a class="bg-transparent"><i class="text-success d-flex f-20" antIcon theme="outline"
+            type="check-circle"></i></a>
+      </div>
+      <div class="dropdown-divider mb-0"></div>
+      <ng-scrollbar style="min-height: 100px" visibility="hover">
+        <div class="dropdown-header p-0 text-wrap header-notification-scroll">
+          <div class="list-group list-group-flush w-100 text-center py-3">
+            <span class="text-muted">Không có thông báo mới</span>
+          </div>
+        </div>
+      </ng-scrollbar>
+      <div class="dropdown-divider mt-0"></div>
+      <div class="text-center py-2">
+        <a href="javascript:" class="link-primary">View all</a>
+      </div>
+    </div>
+  </li>
+  <li class="dropdown pc-h-item header-user-profile" ngbDropdown>
+    <a href="javascript:" class="pc-head-link dropdown-toggle arrow-none me-0" ngbDropdownToggle>
+      <img src="assets/images/user/avatar-2.jpg" alt="user-image" class="user-avatar me-2" />
+      <span class="f-w-600">{{ currentUser?.fullName || 'Admin' }}</span>
+    </a>
+    <div class="dropdown-menu dropdown-user-profile dropdown-menu-end pc-h-dropdown" ngbDropdownMenu>
+      <div class="dropdown-header">
+        <div class="d-flex mb-1">
+          <div class="flex-shrink-0">
+            <img src="assets/images/user/avatar-2.jpg" alt="user-image" class="user-avatar wid-35" />
+          </div>
+          <div class="flex-grow-1 ms-3 text-start">
+            <h6 class="mb-0">{{ currentUser?.fullName || 'Admin' }}</h6>
+            <span>{{ currentUser?.role === 'ADMIN' ? 'Quản trị viên' : currentUser?.role === 'COURT_MANAGER' ? 'Quản lý sân' : 'Người dùng' }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="dropdown-divider"></div>
+      <a href="javascript:" class="dropdown-item" (click)="logout()">
+        <i antIcon type="logout" theme="outline" class="me-2"></i>
+        <span>Đăng xuất</span>
+      </a>
+    </div>
+  </li>
+</ul>

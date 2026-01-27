@@ -1,0 +1,559 @@
+<main class="landing-page">
+  <!-- Registration Success Alert -->
+  <div class="container mt-3" *ngIf="showRegistrationSuccess">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <i antIcon type="check-circle" theme="fill" class="me-2"></i>
+      <strong>Đăng ký thành công!</strong> Vui lòng kiểm tra email để xác thực tài khoản của bạn.
+      <button type="button" class="btn-close" (click)="showRegistrationSuccess = false" aria-label="Close"></button>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero-with-image">
+    <div class="hero-background">
+      <img src="assets/images/index.jpg" alt="Pickleball Court" class="hero-image">
+      <div class="hero-overlay"></div>
+    </div>
+    <div class="container">
+      <div class="row align-items-center justify-content-center min-vh-75">
+        <div class="col-lg-10 col-xl-8 text-center position-relative" style="z-index: 2;">
+          <h1 class="hero-title text-white mb-4">
+            Tìm và Đặt Sân Pickleball
+          </h1>
+          <p class="hero-subtitle text-white mb-5">
+            Khám phá và đặt sân Pickleball yêu thích của bạn một cách dễ dàng.
+            Tìm kiếm theo khu vực, chọn khung giờ phù hợp và đặt sân ngay hôm nay!
+          </p>
+          <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a routerLink="/player/court-search" class="btn btn-white btn-lg shadow-lg">
+              <i antIcon type="search" theme="outline" class="me-2"></i>
+              Tìm Kiếm Sân Ngay
+            </a>
+            <a routerLink="/player/register" class="btn btn-outline-white btn-lg">
+              <i antIcon type="user-add" theme="outline" class="me-2"></i>
+              Đăng Ký Ngay
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Search Bar Section -->
+  <section class="search-bar-section">
+    <div class="container">
+      <div class="card shadow-lg border-0 search-bar-card">
+        <div class="card-body p-4">
+          <form [formGroup]="searchForm" (ngSubmit)="onSearchSubmit()" class="search-form">
+            <div class="row align-items-end g-3">
+              <div class="col-md-3">
+                <label class="form-label f-w-600 mb-2">Quận/Huyện</label>
+                <input type="text" class="form-control" formControlName="district" placeholder="Nhập quận/huyện">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label f-w-600 mb-2">Ngày</label>
+                <input type="date" class="form-control" formControlName="date" [min]="todayDate">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label f-w-600 mb-2">Giờ bắt đầu</label>
+                <input type="time" class="form-control" formControlName="startTime">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label f-w-600 mb-2">Giờ kết thúc</label>
+                <input type="time" class="form-control" formControlName="endTime">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label f-w-600 mb-2 d-block">&nbsp;</label>
+                <button type="submit" class="btn btn-primary w-100 shadow">
+                  <i antIcon type="search" theme="outline" class="me-2"></i>
+                  Tìm kiếm
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Search Results Section -->
+  <section class="search-results-section" id="court-results" *ngIf="searchResults.length > 0 || loadingSearch || error">
+    <div class="container">
+      <div class="row justify-content-center mb-5">
+        <div class="col-lg-8 text-center">
+          <h2 class="section-title mb-3">Kết Quả Tìm Kiếm</h2>
+          <p class="section-subtitle" *ngIf="searchResults.length > 0">
+            Tìm thấy {{ searchResults.length }} sân phù hợp với yêu cầu của bạn
+          </p>
+        </div>
+      </div>
+
+      <div *ngIf="error" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+        <strong>Lỗi!</strong> {{ error }}
+        <button type="button" class="btn-close" (click)="clearError()" aria-label="Close"></button>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="loadingSearch" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        </div>
+      </div>
+
+      <!-- No Results -->
+      <div *ngIf="!loadingSearch && (!searchResults || searchResults.length === 0)" class="text-center py-5">
+        <p class="text-muted">Không có sân nào phù hợp</p>
+      </div>
+
+      <!-- Search Results Carousel -->
+      <div *ngIf="!loadingSearch && searchResults && searchResults.length > 0" class="search-results-carousel">
+        <div class="carousel-wrapper">
+          <!-- Navigation Arrow Left -->
+          <button class="carousel-nav carousel-nav-prev" (click)="prevSearchSlide()"
+            [disabled]="currentSearchIndex === 0" [class.disabled]="currentSearchIndex === 0">
+            <i antIcon type="left" theme="outline"></i>
+          </button>
+
+          <!-- Carousel Content -->
+          <div class="carousel-content">
+            <div class="row g-3">
+              <div class="col-lg-3 col-md-4 col-sm-6" *ngFor="let court of getCurrentSearchCourts()">
+                <div class="court-card card shadow-sm border-0 h-100">
+                  <!-- Image with Status Badge -->
+                  <div class="court-image-wrapper">
+                    <img [src]="getCourtImage(court)" [alt]="court.courtName" class="court-image">
+                    <div class="court-status-badge" [ngClass]="getStatusBadgeClass(court.status)">
+                      {{ getStatusBadgeText(court.status) }}
+                    </div>
+                  </div>
+
+                  <div class="card-body">
+                    <!-- Rating -->
+                    <div class="court-rating mb-2" *ngIf="court.rating !== undefined">
+                      <span class="rating-value">{{ court.rating }}</span>
+                      <span class="rating-stars">
+                        <i *ngFor="let filled of getStars(court.rating); let i = index" antIcon
+                          [type]="filled ? 'star-fill' : 'star'" [theme]="filled ? 'fill' : 'outline'"
+                          class="star-icon">
+                        </i>
+                      </span>
+                      <span class="review-count" *ngIf="court.reviewCount">
+                        {{ court.reviewCount }} đánh giá
+                      </span>
+                    </div>
+
+                    <!-- Court Name -->
+                    <h6 class="court-name mb-2">{{ court.courtName }}</h6>
+
+                    <!-- Address -->
+                    <div class="court-info mb-2">
+                      <i antIcon type="environment" theme="outline" class="info-icon"></i>
+                      <span class="info-text">{{ court.location }}</span>
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="court-info mb-2" *ngIf="court.phone">
+                      <i antIcon type="phone" theme="outline" class="info-icon"></i>
+                      <span class="info-text">{{ court.phone }}</span>
+                    </div>
+
+                    <!-- Services/Amenities -->
+                    <div class="court-services mb-3" *ngIf="court.amenities && court.amenities.length > 0">
+                      <div class="services-label">Liên hệ: Dịch vụ:</div>
+                      <div class="services-icons">
+                        <span class="service-icon" *ngFor="let amenity of court.amenities.slice(0, 5)">
+                          {{ amenity }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="court-price mb-3">
+                      <span class="price-label">
+                        <span *ngIf="$any(court).slotStartTime && $any(court).slotEndTime">
+                          Giá ({{ $any(court).slotStartTime }} - {{ $any(court).slotEndTime }})
+                        </span>
+                        <span *ngIf="!$any(court).slotStartTime || !$any(court).slotEndTime">
+                          <span *ngIf="searchForm.get('startTime')?.value">Giá ({{ searchForm.get('startTime')?.value }}
+                            -
+                            {{ searchForm.get('endTime')?.value }})</span>
+                          <span *ngIf="!searchForm.get('startTime')?.value">Từ</span>
+                        </span>
+                      </span>
+                      <span class="price-value">{{ getSlotPrice(court) | number:'1.0-0' }}₫<small
+                          class="text-muted fw-normal fs-6">{{ getSlotDurationLabel(court) }}</small></span>
+                    </div>
+
+                    <!-- View Details Button -->
+                    <a [routerLink]="['/player/court-detail', court.courtId]"
+                      [queryParams]="{ date: searchForm.get('date')?.value, startTime: searchForm.get('startTime')?.value, endTime: searchForm.get('endTime')?.value }"
+                      class="btn btn-primary btn-sm w-100">
+                      <i antIcon type="eye" theme="outline" class="me-1"></i>
+                      Xem chi tiết
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Navigation Arrow Right -->
+          <button class="carousel-nav carousel-nav-next" (click)="nextSearchSlide()"
+            [disabled]="currentSearchIndex >= totalSearchPages - 1"
+            [class.disabled]="currentSearchIndex >= totalSearchPages - 1">
+            <i antIcon type="right" theme="outline"></i>
+          </button>
+        </div>
+
+        <!-- Pagination Dots -->
+        <div class="carousel-pagination" *ngIf="totalSearchPages > 1">
+          <button *ngFor="let page of [].constructor(totalSearchPages); let i = index" class="pagination-dot"
+            [class.active]="i === currentSearchIndex" (click)="goToSearchPage(i)"
+            [attr.aria-label]="'Go to page ' + (i + 1)">
+          </button>
+        </div>
+      </div>
+
+      <div class="text-center mt-5" *ngIf="searchResults.length > 0">
+        <a routerLink="/player/court-search" class="btn btn-primary btn-lg shadow">
+          <i antIcon type="unordered-list" theme="outline" class="me-2"></i>
+          Xem Tất Cả Sân
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Statistics Section -->
+  <section class="statistics-section">
+    <div class="container">
+      <div class="row text-center">
+        <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+          <div class="stat-item">
+            <h2 class="display-2 text-white mb-2 f-w-700">50+</h2>
+            <h5 class="text-white f-w-600 mb-2">Sân Pickleball</h5>
+            <p class="text-white mb-0">Trải dài khắp Hà Nội</p>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+          <div class="stat-item">
+            <h2 class="display-2 text-white mb-2 f-w-700">10K+</h2>
+            <h5 class="text-white f-w-600 mb-2">Lượt Đặt Sân</h5>
+            <p class="text-white mb-0">Mỗi tháng</p>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+          <div class="stat-item">
+            <h2 class="display-2 text-white mb-2 f-w-700">5K+</h2>
+            <h5 class="text-white f-w-600 mb-2">Khách Hàng</h5>
+            <p class="text-white mb-0">Đã tin tưởng sử dụng</p>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+          <div class="stat-item">
+            <h2 class="display-2 text-white mb-2 f-w-700">4.8★</h2>
+            <h5 class="text-white f-w-600 mb-2">Đánh Giá</h5>
+            <p class="text-white mb-0">Từ khách hàng</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <div class="container">
+      <div class="row justify-content-center text-center mb-5">
+        <div class="col-lg-8">
+          <span class="feature-badge">TÍNH NĂNG NỔI BẬT</span>
+          <h2 class="section-title mb-3">Tại Sao Chọn Chúng Tôi?</h2>
+          <p class="section-subtitle">
+            Hệ thống đặt sân Pickleball hiện đại và tiện lợi nhất
+          </p>
+        </div>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-purple">
+              <i antIcon type="clock-circle" theme="outline" class="text-white"></i>
+            </div>
+            <h5 class="feature-title">Đặt Sân Nhanh Chóng</h5>
+            <p class="feature-description">
+              Tìm và đặt sân chỉ trong vài phút với giao diện thân thiện, dễ sử dụng
+            </p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-teal">
+              <i antIcon type="credit-card" theme="outline" class="text-white"></i>
+            </div>
+            <h5 class="feature-title">Thanh Toán An Toàn</h5>
+            <p class="feature-description">
+              Hỗ trợ nhiều phương thức thanh toán trực tuyến an toàn và tiện lợi
+            </p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-orange">
+              <i antIcon type="check-circle" theme="outline" class="text-white"></i>
+            </div>
+            <h5 class="feature-title">Xác Nhận Tức Thì</h5>
+            <p class="feature-description">
+              Nhận xác nhận đặt sân ngay lập tức qua email và SMS
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="how-it-works-section">
+    <div class="container">
+      <div class="row justify-content-center text-center mb-5">
+        <div class="col-lg-8">
+          <span class="how-it-works-badge">HƯỚNG DẪN</span>
+          <h2 class="section-title mb-3">Cách Thức Hoạt Động</h2>
+          <p class="section-subtitle">
+            Chỉ với 4 bước đơn giản để đặt sân Pickleball
+          </p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+          <div class="step-item">
+            <div class="step-number-wrapper">
+              <div class="step-number step-number-purple">
+                <span class="f-w-700">1</span>
+              </div>
+              <div class="step-connector step-connector-purple">
+                <i antIcon type="plus" theme="outline" class="connector-icon"></i>
+              </div>
+            </div>
+            <div class="step-icon step-icon-purple">
+              <i antIcon type="search" theme="outline"></i>
+            </div>
+            <h4 class="f-w-600 mb-3">Tìm Kiếm Sân</h4>
+            <p class="text-muted">
+              Chọn ngày, khung giờ và khu vực bạn muốn chơi
+            </p>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+          <div class="step-item">
+            <div class="step-number-wrapper">
+              <div class="step-number step-number-green">
+                <span class="f-w-700">2</span>
+              </div>
+              <div class="step-connector step-connector-green">
+                <i antIcon type="check" theme="outline" class="connector-icon"></i>
+              </div>
+            </div>
+            <div class="step-icon step-icon-green">
+              <i antIcon type="check-circle" theme="outline"></i>
+            </div>
+            <h4 class="f-w-600 mb-3">Chọn Sân & Dịch Vụ</h4>
+            <p class="text-muted">
+              Xem chi tiết sân và chọn dịch vụ đi kèm nếu cần
+            </p>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+          <div class="step-item">
+            <div class="step-number-wrapper">
+              <div class="step-number step-number-orange">
+                <span class="f-w-700">3</span>
+              </div>
+              <div class="step-connector step-connector-orange">
+                <i antIcon type="wallet" theme="outline" class="connector-icon"></i>
+              </div>
+            </div>
+            <div class="step-icon step-icon-orange">
+              <i antIcon type="credit-card" theme="outline"></i>
+            </div>
+            <h4 class="f-w-600 mb-3">Thanh Toán</h4>
+            <p class="text-muted">
+              Thanh toán trực tuyến an toàn qua nhiều phương thức
+            </p>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+          <div class="step-item">
+            <div class="step-number-wrapper">
+              <div class="step-number step-number-red">
+                <span class="f-w-700">4</span>
+              </div>
+            </div>
+            <div class="step-icon step-icon-red">
+              <i antIcon type="check-circle" theme="outline"></i>
+            </div>
+            <h4 class="f-w-600 mb-3">Xác Nhận & Chơi</h4>
+            <p class="text-muted">
+              Nhận xác nhận và đến sân đúng giờ để chơi
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section class="testimonials-section">
+    <div class="container">
+      <div class="row justify-content-center text-center mb-5">
+        <div class="col-lg-8">
+          <h2 class="section-title mb-3">Khách Hàng Nói Gì Về Chúng Tôi?</h2>
+          <p class="section-subtitle">
+            Những đánh giá chân thực từ người chơi Pickleball
+          </p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-4 col-md-6 mb-4">
+          <app-card [showHeader]="false">
+            <div class="mb-3">
+              <i antIcon type="star-fill" class="text-warning"></i>
+              <i antIcon type="star-fill" class="text-warning"></i>
+              <i antIcon type="star-fill" class="text-warning"></i>
+              <i antIcon type="star-fill" class="text-warning"></i>
+              <i antIcon type="star-fill" class="text-warning"></i>
+            </div>
+            <p class="text-muted mb-4">
+              "Hệ thống đặt sân rất tiện lợi và dễ sử dụng. Tôi có thể đặt sân chỉ trong vài phút và nhận được xác nhận
+              ngay lập tức. Rất hài lòng!"
+            </p>
+            <div class="d-flex align-items-center">
+              <div
+                class="avatar avatar-lg rounded-circle mr-3 bg-light-primary text-primary d-flex align-items-center justify-content-center">
+                <span class="f-w-600">NV</span>
+              </div>
+              <div>
+                <h6 class="mb-0 f-w-600">Nguyễn Văn</h6>
+                <small class="text-muted">Người chơi thường xuyên</small>
+              </div>
+            </div>
+          </app-card>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-4">
+          <app-card [showHeader]="false">
+            <div class="mb-3">
+              <i antIcon type="star-fill" class="text-warning"></i>
+              <i antIcon type="star-fill" class="text-warning"></i>
+              <i antIcon type="star-fill" class="text-warning"></i>
+              <i antIcon type="star-fill" class="text-warning"></i>
+              <i antIcon type="star-fill" class="text-warning"></i>
+            </div>
+            <p class="text-muted mb-4">
+              "Thanh toán rất an toàn và nhanh chóng. Tôi thích cách hệ thống hiển thị rõ ràng các khung giờ còn trống.
+              Đã giới thiệu cho nhiều bạn bè!"
+            </p>
+            <div class="d-flex align-items-center">
+              <div
+                class="avatar avatar-lg rounded-circle mr-3 bg-light-success text-success d-flex align-items-center justify-content-center">
+                <span class="f-w-600">LT</span>
+              </div>
+              <div>
+                <h6 class="mb-0 f-w-600">Lê Thị</h6>
+                <small class="text-muted">Người chơi mới</small>
+              </div>
+            </div>
+          </app-card>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-4">
+          <app-card [showHeader]="false">
+            <div class="mb-3">
+              <i antIcon type="star-fill" class="text-warning"></i>
+              <i antIcon type="star-fill" class="text-warning"></i>
+              <i antIcon type="star-fill" class="text-warning"></i>
+              <i antIcon type="star-fill" class="text-warning"></i>
+              <i antIcon type="star-fill" class="text-warning"></i>
+            </div>
+            <p class="text-muted mb-4">
+              "Giao diện đẹp, dễ sử dụng. Tôi có thể tìm được sân gần nhà và đặt ngay trong ngày. Dịch vụ hỗ trợ khách
+              hàng cũng rất tốt!"
+            </p>
+            <div class="d-flex align-items-center">
+              <div
+                class="avatar avatar-lg rounded-circle mr-3 bg-light-warning text-warning d-flex align-items-center justify-content-center">
+                <span class="f-w-600">TM</span>
+              </div>
+              <div>
+                <h6 class="mb-0 f-w-600">Trần Minh</h6>
+                <small class="text-muted">Người chơi chuyên nghiệp</small>
+              </div>
+            </div>
+          </app-card>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Promotion Section -->
+  <section class="promotion-section">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-6 mb-4 mb-lg-0">
+          <div class="promotion-content">
+            <span class="badge bg-light-primary text-primary mb-3">ƯU ĐÃI ĐẶC BIỆT</span>
+            <h2 class="section-title mb-4">Giảm 20% Cho Lần Đặt Đầu Tiên</h2>
+            <p class="section-subtitle mb-4">
+              Đăng ký tài khoản mới và nhận ngay ưu đãi giảm 20% cho lần đặt sân đầu tiên của bạn. Áp dụng cho tất cả
+              các sân!
+            </p>
+            <ul class="list-unstyled mb-4">
+              <li class="mb-2">
+                <i antIcon type="check-circle" theme="outline" class="text-success me-2"></i>
+                Áp dụng cho tất cả các sân
+              </li>
+              <li class="mb-2">
+                <i antIcon type="check-circle" theme="outline" class="text-success me-2"></i>
+                Không giới hạn số lượng
+              </li>
+              <li class="mb-2">
+                <i antIcon type="check-circle" theme="outline" class="text-success me-2"></i>
+                Có hiệu lực ngay sau khi đăng ký
+              </li>
+            </ul>
+            <a routerLink="/player/register" class="btn btn-primary btn-lg shadow">
+              <i antIcon type="user-add" theme="outline" class="me-2"></i>
+              Đăng Ký Ngay
+            </a>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="promotion-image">
+            <div
+              class="icon icon-xl icon-shape bg-gradient-primary shadow rounded-circle d-inline-flex align-items-center justify-content-center">
+              <i antIcon type="tag" theme="outline" class="text-white f-64"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="row justify-content-center text-center">
+        <div class="col-lg-8">
+          <h2 class="text-white mb-4">Sẵn Sàng Đặt Sân Ngay Hôm Nay?</h2>
+          <p class="text-white mb-5">
+            Tham gia cùng hàng nghìn người chơi Pickleball đã tin tưởng và sử dụng dịch vụ của chúng tôi
+          </p>
+          <div class="btn-wrapper">
+            <a routerLink="/player/court-search" class="btn btn-white btn-lg shadow-lg">
+              <i antIcon type="search" theme="outline" class="me-2"></i>
+              Tìm Kiếm Sân Ngay
+            </a>
+            <a routerLink="/player/register" class="btn btn-outline-white btn-lg">
+              <i antIcon type="user-add" theme="outline" class="me-2"></i>
+              Đăng Ký Tài Khoản
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>

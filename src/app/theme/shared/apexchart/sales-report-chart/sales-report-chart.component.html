@@ -1,0 +1,12 @@
+<h5 class="mb-3">Biểu đồ Doanh thu (7 ngày qua)</h5>
+<div class="card">
+  <div class="card-body">
+    <!-- Removed static stats -->
+    <div id="chart">
+      <apx-chart [series]="chartOptions.series" [chart]="chartOptions.chart" [dataLabels]="chartOptions.dataLabels"
+        [legend]="chartOptions.legend" [xaxis]="chartOptions.xaxis" [colors]="chartOptions.colors"
+        [stroke]="chartOptions.stroke" [grid]="chartOptions.grid" [plotOptions]="chartOptions.plotOptions"
+        [tooltip]="chartOptions.tooltip"></apx-chart>
+    </div>
+  </div>
+</div>

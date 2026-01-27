@@ -1,0 +1,72 @@
+<div class="pricing-settings-page">
+  <div class="container-fluid">
+    <div class="row" *ngIf="isLoading && !settings">
+      <div class="col-12">
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+          </div>
+          <p class="text-muted mt-3 mb-0">Đang tải cấu hình...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" *ngIf="error && !isLoading">
+      <div class="col-12">
+        <div class="alert alert-danger">{{ error }}</div>
+      </div>
+    </div>
+
+    <div class="row" *ngIf="!isLoading && settings">
+      <div class="col-12">
+        <app-card cardTitle="Thiết lập Giá sàn/Giá trần" [padding]="0">
+          <div class="p-3">
+            <form>
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">
+                    <i antIcon type="dollar" theme="outline" class="me-1"></i>
+                    Giá sàn (₫/giờ)
+                  </label>
+                  <input type="number" class="form-control" 
+                         [(ngModel)]="formData.minPrice" 
+                         name="minPrice"
+                         min="0"
+                         placeholder="Nhập giá sàn">
+                  <small class="text-muted">Giá thấp nhất cho phép khi đặt sân</small>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">
+                    <i antIcon type="dollar" theme="outline" class="me-1"></i>
+                    Giá trần (₫/giờ)
+                  </label>
+                  <input type="number" class="form-control" 
+                         [(ngModel)]="formData.maxPrice" 
+                         name="maxPrice"
+                         min="0"
+                         placeholder="Nhập giá trần">
+                  <small class="text-muted">Giá cao nhất cho phép khi đặt sân</small>
+                </div>
+              </div>
+
+              <div class="alert alert-info">
+                <strong>Lưu ý:</strong> Giá sàn và giá trần sẽ được áp dụng cho tất cả các sân trong hệ thống. 
+                Quản lý sân không thể đặt giá ngoài phạm vi này.
+              </div>
+
+              <div class="d-flex justify-content-end">
+                <button type="button" class="btn btn-primary" (click)="save()" [disabled]="isSaving">
+                  <i antIcon type="save" theme="outline" class="me-1"></i>
+                  {{ isSaving ? 'Đang lưu...' : 'Lưu cấu hình' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </app-card>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+

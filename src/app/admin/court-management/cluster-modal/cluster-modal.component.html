@@ -1,0 +1,66 @@
+<div class="modal-header">
+    <h4 class="modal-title">{{ cluster ? 'Chỉnh sửa Cụm sân' : 'Thêm Cụm sân mới' }}</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+</div>
+<div class="modal-body">
+    <form [formGroup]="form" (ngSubmit)="save()">
+        <div *ngIf="error" class="alert alert-danger mb-3">{{ error }}</div>
+        <div class="mb-3">
+            <label class="form-label">Tên cụm sân <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" formControlName="courtGroupName"
+                [class.is-invalid]="form.get('courtGroupName')?.invalid && form.get('courtGroupName')?.touched"
+                placeholder="Ví dụ: Cụm sân Pickleball Quận 1">
+            <div class="invalid-feedback" *ngIf="form.get('courtGroupName')?.invalid && form.get('courtGroupName')?.touched">
+                Tên cụm sân là bắt buộc.
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" formControlName="address" 
+                [class.is-invalid]="form.get('address')?.invalid && form.get('address')?.touched"
+                placeholder="Ví dụ: 123 Nguyễn Huệ">
+            <div class="invalid-feedback" *ngIf="form.get('address')?.invalid && form.get('address')?.touched">
+                Địa chỉ là bắt buộc.
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Quản lý sân (Manager)</label>
+            <select class="form-select" formControlName="managerId">
+                <option [ngValue]="null">-- Chọn Quản lý --</option>
+                <option *ngFor="let manager of managers" [ngValue]="manager.userId">{{ manager.fullName }} ({{
+                    manager.email }})</option>
+            </select>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Quận/Huyện <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" formControlName="district" 
+                    [class.is-invalid]="form.get('district')?.invalid && form.get('district')?.touched"
+                    placeholder="Ví dụ: Quận 1">
+                <div class="invalid-feedback" *ngIf="form.get('district')?.invalid && form.get('district')?.touched">
+                    Quận/Huyện là bắt buộc.
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Thành phố <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" formControlName="city" 
+                    [class.is-invalid]="form.get('city')?.invalid && form.get('city')?.touched"
+                    placeholder="Ví dụ: TP. Hồ Chí Minh">
+                <div class="invalid-feedback" *ngIf="form.get('city')?.invalid && form.get('city')?.touched">
+                    Thành phố là bắt buộc.
+                </div>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Mô tả</label>
+            <textarea class="form-control" formControlName="description" rows="3"></textarea>
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="close()" [disabled]="isLoading">Hủy</button>
+    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="form.invalid || isLoading">
+        <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+        {{ isLoading ? 'Đang lưu...' : 'Lưu thay đổi' }}
+    </button>
+</div>

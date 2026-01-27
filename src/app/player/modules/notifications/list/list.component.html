@@ -1,0 +1,211 @@
+<div class="notifications-page">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <div class="page-header mb-4">
+          <h2 class="page-title">
+            <i antIcon type="bell" theme="outline" class="me-2"></i>
+            Thông báo
+          </h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <!-- Filters Card -->
+        <app-card [showHeader]="false" blockClass="mb-4">
+      <div class="d-flex flex-wrap align-items-center gap-3">
+        <!-- Filter by Read Status -->
+        <div class="d-flex align-items-center gap-2">
+          <label class="mb-0 f-w-600">Trạng thái:</label>
+          <div class="btn-group" role="group">
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.btn-primary]="selectedFilter === 'all'"
+              [class.btn-outline-primary]="selectedFilter !== 'all'"
+              (click)="onFilterChange('all')">
+              Tất cả
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.btn-primary]="selectedFilter === 'unread'"
+              [class.btn-outline-primary]="selectedFilter !== 'unread'"
+              (click)="onFilterChange('unread')">
+              Chưa đọc <span class="badge bg-light text-dark ms-2" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.btn-primary]="selectedFilter === 'read'"
+              [class.btn-outline-primary]="selectedFilter !== 'read'"
+              (click)="onFilterChange('read')">
+              Đã đọc
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter by Type -->
+        <div class="d-flex align-items-center gap-2">
+          <label class="mb-0 f-w-600">Loại:</label>
+          <div class="btn-group" role="group">
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.btn-primary]="selectedType === 'all'"
+              [class.btn-outline-primary]="selectedType !== 'all'"
+              (click)="onTypeChange('all')">
+              Tất cả
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.btn-primary]="selectedType === NotificationType.BOOKING"
+              [class.btn-outline-primary]="selectedType !== NotificationType.BOOKING"
+              (click)="onTypeChange(NotificationType.BOOKING)">
+              Đặt sân
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.btn-primary]="selectedType === NotificationType.PAYMENT"
+              [class.btn-outline-primary]="selectedType !== NotificationType.PAYMENT"
+              (click)="onTypeChange(NotificationType.PAYMENT)">
+              Thanh toán
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.btn-primary]="selectedType === NotificationType.REMINDER"
+              [class.btn-outline-primary]="selectedType !== NotificationType.REMINDER"
+              (click)="onTypeChange(NotificationType.REMINDER)">
+              Nhắc nhở
+            </button>
+          </div>
+        </div>
+
+        <!-- Mark All Read Button -->
+        <div class="ms-auto">
+          <button 
+            class="btn btn-primary btn-sm" 
+            (click)="markAllAsRead()"
+            [disabled]="unreadCount === 0 || isLoading">
+            <i antIcon type="check-circle" theme="outline" class="me-2"></i>
+            Đánh dấu tất cả đã đọc
+          </button>
+        </div>
+        </div>
+      </app-card>
+
+        <!-- Notifications List Card -->
+        <app-card [showHeader]="false">
+      <!-- Loading State -->
+      <div class="text-center py-5" *ngIf="isLoading">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Đang tải...</span>
+        </div>
+        <p class="text-muted mt-3 mb-0">Đang tải thông báo...</p>
+      </div>
+
+      <!-- Error State -->
+      <div class="alert alert-danger" role="alert" *ngIf="error && !isLoading">
+        <i antIcon type="exclamation-circle" theme="outline" class="me-2"></i>
+        {{ error }}
+      </div>
+
+      <!-- Empty State -->
+      <div class="text-center py-5" *ngIf="!isLoading && !error && notifications.length === 0">
+        <i antIcon type="bell" theme="outline" style="font-size: 48px;" class="text-muted"></i>
+        <h5 class="mt-3 mb-1">Không có thông báo</h5>
+        <p class="text-muted mb-0">Bạn chưa có thông báo nào.</p>
+      </div>
+
+      <!-- Notifications List using Mantis list-group -->
+      <div class="list-group list-group-flush" *ngIf="!isLoading && !error && notifications.length > 0">
+        <a 
+          href="javascript:"
+          class="list-group-item list-group-item-action px-3 py-3"
+          [class.bg-light]="!notification.isRead"
+          [class.border-start]="!notification.isRead"
+          [class.border-start-4]="!notification.isRead"
+          [class.border-primary]="!notification.isRead"
+          *ngFor="let notification of notifications"
+          (click)="goToDetail(notification)">
+          <div class="d-flex align-items-start">
+            <!-- Icon -->
+            <div class="flex-shrink-0 position-relative">
+              <div class="avatar avatar-s rounded-circle" [ngClass]="'bg-' + getNotificationIconColor(notification.type)">
+                <i antIcon [type]="getNotificationIcon(notification.type)" theme="outline" style="font-size: 16px;"></i>
+              </div>
+              <span class="badge-circle bg-danger position-absolute top-0 end-0" *ngIf="!notification.isRead"></span>
+            </div>
+
+            <!-- Content -->
+            <div class="flex-grow-1 ms-3">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h6 class="mb-0 f-w-600">{{ notification.title }}</h6>
+                <span class="badge" [ngClass]="'border border-' + getNotificationIconColor(notification.type) + ' text-' + getNotificationIconColor(notification.type)">
+                  {{ getNotificationTypeLabel(notification.type) }}
+                </span>
+              </div>
+              <p class="mb-2 text-muted">{{ notification.message }}</p>
+              <div class="d-flex align-items-center justify-content-between">
+                <small class="text-muted">
+                  <i antIcon type="clock-circle" theme="outline" class="me-1"></i>
+                  {{ getTimeAgo(notification.createdAt) }}
+                </small>
+                <div class="d-flex gap-2">
+                  <button
+                    class="btn btn-sm btn-link text-primary p-0"
+                    (click)="markAsRead(notification.notificationId || notification.id); $event.stopPropagation()"
+                    *ngIf="!notification.isRead"
+                    title="Đánh dấu đã đọc">
+                    <i antIcon type="check-circle" theme="outline"></i>
+                  </button>
+                  <button
+                    class="btn btn-sm btn-link text-danger p-0"
+                    (click)="deleteNotification(notification, $event)"
+                    title="Xóa thông báo">
+                    <i antIcon type="delete" theme="outline"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Pagination -->
+      <div class="mt-4" *ngIf="!isLoading && totalPages > 1">
+        <nav aria-label="Page navigation">
+          <ul class="pagination justify-content-center mb-0">
+            <li class="page-item" [class.disabled]="currentPage === 1">
+              <a class="page-link" (click)="onPageChange(currentPage - 1)" *ngIf="currentPage > 1">
+                Trước
+              </a>
+              <span class="page-link" *ngIf="currentPage === 1">Trước</span>
+            </li>
+            <li class="page-item" *ngFor="let page of getPageNumbers()" [class.active]="page === currentPage">
+              <a class="page-link" (click)="onPageChange(page)">{{ page }}</a>
+            </li>
+            <li class="page-item" [class.disabled]="currentPage === totalPages">
+              <a class="page-link" (click)="onPageChange(currentPage + 1)" *ngIf="currentPage < totalPages">
+                Sau
+              </a>
+              <span class="page-link" *ngIf="currentPage === totalPages">Sau</span>
+            </li>
+          </ul>
+        </nav>
+        <div class="text-center mt-2">
+          <small class="text-muted">
+            Hiển thị {{ (currentPage - 1) * pageSize + 1 }} - {{ Math.min(currentPage * pageSize, total) }} của {{ total }} thông báo
+          </small>
+        </div>
+      </div>
+        </app-card>
+      </div>
+    </div>
+  </div>
+</div>

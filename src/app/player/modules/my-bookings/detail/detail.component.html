@@ -1,0 +1,169 @@
+<div class="booking-detail-page">
+  <div class="container">
+    <!-- Page Header -->
+    <div class="row">
+      <div class="col-12">
+        <div class="page-header mb-4">
+          <button class="btn btn-link p-0 mb-2" (click)="goBack()">
+            <i antIcon type="arrow-left" theme="outline" class="me-2"></i>
+          </button>
+          <h2 class="page-title">
+            Chi tiết đặt sân
+          </h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- Booking Detail -->
+    <div class="row">
+      <div class="col-lg-8 col-md-12 mx-auto">
+        <!-- Loading State -->
+        <div class="text-center py-5" *ngIf="isLoading">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+          </div>
+          <p class="text-muted mt-3">Đang tải thông tin đặt sân...</p>
+        </div>
+
+        <!-- Error State -->
+        <div class="alert alert-danger" role="alert" *ngIf="error && !isLoading">
+          <i antIcon type="exclamation-circle" theme="outline" class="me-2"></i>
+          {{ error }}
+        </div>
+
+        <!-- Booking Detail Card -->
+        <app-card [showHeader]="false" blockClass="booking-detail-card" *ngIf="!isLoading && !error && booking">
+          <!-- Booking Status -->
+          <div class="booking-status-section mb-4">
+            <div class="d-flex align-items-center justify-content-between">
+              <div class="d-flex align-items-center">
+                <div class="avatar avatar-s rounded-circle me-3" [ngClass]="'bg-' + getStatusColor(booking.status)">
+                  <i antIcon [type]="getStatusIcon(booking.status)" theme="outline" style="font-size: 16px;"></i>
+                </div>
+                <div>
+                  <h4 class="mb-0">Mã đặt sân: #{{ booking.bookingId }}</h4>
+                  <span class="badge" [ngClass]="'border border-' + getStatusColor(booking.status) + ' text-' + getStatusColor(booking.status)">
+                    {{ getStatusLabel(booking.status) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Court Information -->
+          <div class="info-section mb-4">
+            <h5 class="section-title mb-3">
+              <i antIcon type="environment" theme="outline" class="me-2"></i>
+              Thông tin sân
+            </h5>
+            <div class="info-item mb-2">
+              <strong>Tên sân:</strong> {{ booking.courtName || booking.court?.courtName || 'N/A' }}
+            </div>
+            <div class="info-item mb-2">
+              <strong>Cụm sân:</strong> {{ booking.courtGroupName || booking.court?.location || 'N/A' }}
+            </div>
+            <div class="info-item mb-2" *ngIf="booking.court?.phone">
+              <strong>Số điện thoại:</strong> 
+              <i antIcon type="phone" theme="outline" class="me-1"></i>
+              {{ booking.court.phone }}
+            </div>
+          </div>
+
+          <!-- Booking Details -->
+          <div class="info-section mb-4">
+            <h5 class="section-title mb-3">
+              <i antIcon type="calendar" theme="outline" class="me-2"></i>
+              Thông tin đặt sân
+            </h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="info-item">
+                  <i antIcon type="calendar" theme="outline" class="me-2 text-primary"></i>
+                  <strong>Ngày đặt:</strong> {{ getFormattedDate(booking.bookingDate) }}
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="info-item">
+                  <i antIcon type="clock-circle" theme="outline" class="me-2 text-primary"></i>
+                  <strong>Khung giờ:</strong> {{ getFormattedTime(booking.startTime) }} - {{ getFormattedTime(booking.endTime) }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Services -->
+          <div class="info-section mb-4" *ngIf="booking.services && booking.services.length > 0">
+            <h5 class="section-title mb-3">
+              <i antIcon type="check-circle" theme="outline" class="me-2"></i>
+              Dịch vụ đi kèm
+            </h5>
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Tên dịch vụ</th>
+                    <th>Số lượng</th>
+                    <th>Đơn giá</th>
+                    <th class="text-end">Thành tiền</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let service of booking.services">
+                    <td>{{ service.serviceName || service.service?.serviceName || 'N/A' }}</td>
+                    <td>{{ service.quantity }} {{ service.service?.unit || '' }}</td>
+                    <td>{{ getFormattedPrice(service.unitPrice) }}</td>
+                    <td class="text-end">{{ getFormattedPrice(service.totalPrice) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Payment Information -->
+          <div class="info-section mb-4" *ngIf="booking.payment">
+            <h5 class="section-title mb-3">
+              <i antIcon type="wallet" theme="outline" class="me-2"></i>
+              Thông tin thanh toán
+            </h5>
+            <div class="info-item mb-2">
+              <strong>Phương thức thanh toán:</strong> {{ getPaymentMethodLabel(booking.payment.paymentMethod) }}
+            </div>
+            <div class="info-item mb-2" *ngIf="booking.payment.transactionId">
+              <strong>Mã giao dịch:</strong> {{ booking.payment.transactionId }}
+            </div>
+            <div class="info-item mb-2" *ngIf="booking.payment.paidAt">
+              <strong>Thời gian thanh toán:</strong> {{ getFormattedDateTime(booking.payment.paidAt) }}
+            </div>
+            <div class="info-item mb-2">
+              <strong>Trạng thái thanh toán:</strong>
+              <span class="badge" [ngClass]="booking.payment.status === 'SUCCESS' ? 'bg-success' : 'bg-warning'">
+                {{ booking.payment.status === 'SUCCESS' ? 'Thành công' : booking.payment.status }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Price Summary -->
+          <div class="price-summary-section mb-4">
+            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+              <h5 class="mb-0">Tổng tiền:</h5>
+              <h4 class="mb-0 text-primary">{{ getFormattedPrice(booking.totalPrice) }}</h4>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="booking-actions-section">
+            <div class="d-flex gap-2 justify-content-end">
+              <button 
+                class="btn btn-danger" 
+                (click)="goToCancel()"
+                *ngIf="canCancel()">
+                <i antIcon type="delete" theme="outline" class="me-2"></i>
+                Hủy đặt sân
+              </button>
+            </div>
+          </div>
+        </app-card>
+      </div>
+    </div>
+  </div>
+</div>

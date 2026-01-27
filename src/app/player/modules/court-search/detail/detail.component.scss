@@ -1,0 +1,112 @@
+// Using global CSS custom properties instead of SCSS variables
+// These are provided by the global styles.scss
+
+.court-detail-page {
+  padding: 2rem 0;
+  min-height: calc(100vh - 200px);
+  background-color: var(--bs-body-bg);
+
+  .container {
+    max-width: 1200px;
+  }
+}
+
+.court-main-card {
+  h2 {
+    font-weight: 700;
+    color: #2c3e50;
+  }
+}
+
+.price-tag {
+  font-weight: 700;
+  color: var(--bs-primary);
+  font-size: 1.25rem;
+}
+
+.rating {
+  i {
+    color: #fadb14; // vàng ngôi sao
+  }
+
+  .rating-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+}
+
+.booking-card {
+  border-top: 4px solid var(--bs-primary);
+
+  .btn {
+    width: 100%;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.amenities {
+  .badge {
+    font-size: 0.85rem;
+    padding: 0.5em 1em;
+    background-color: #f8f9fa !important;
+    color: #495057 !important;
+    border: 1px solid #e9ecef;
+  }
+}
+
+.reviews-section {
+  .avatar-placeholder {
+    font-size: 1.2rem;
+    min-width: 40px;
+  }
+}
+
+.review-list {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 5px; // Avoid scrollbar covering content
+
+  // Custom scrollbar
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+
+    &:hover {
+      background: #bbb;
+    }
+  }
+}
+
+.icon-box {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
+
+  i {
+    font-size: 1.2rem;
+  }
+}
+
+// Carousel custom styles
+::ng-deep .carousel-control-prev,
+::ng-deep .carousel-control-next {
+  width: 5%;
+  background-color: rgba(0, 0, 0, 0.2);
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+}

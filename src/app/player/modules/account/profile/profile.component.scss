@@ -1,0 +1,482 @@
+// Using global CSS custom properties instead of SCSS variables
+// These are provided by the global styles.scss
+
+.profile-page {
+  padding: 2rem 0;
+  min-height: calc(100vh - 200px);
+  background-color: var(--bs-body-bg);
+
+  .container {
+    max-width: 1200px;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--pc-heading-color);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+
+      i {
+        font-size: 1.5rem;
+        color: var(--bs-primary);
+        margin-right: 0.5rem;
+      }
+    }
+
+    .page-subtitle {
+      font-size: 0.95rem;
+      margin-bottom: 0;
+      color: var(--bs-secondary-color);
+    }
+  }
+}
+
+// Profile Avatar Card
+.profile-avatar-card {
+  overflow: hidden; // Prevent content from overflowing card
+
+  .avatar-section {
+    padding: 1.5rem 1rem;
+    overflow: hidden; // Ensure avatar doesn't overflow
+
+    .avatar-wrapper {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 1rem;
+      max-width: 100%;
+      overflow: visible; // Allow button to show outside
+
+      .avatar-img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--bs-primary);
+        box-shadow: 0 4px 15px rgba(var(--bs-primary-rgb), 0.2);
+        transition: all 0.3s ease;
+        display: block;
+        margin: 0 auto;
+
+        &:hover {
+          transform: scale(1.02);
+          box-shadow: 0 6px 20px rgba(var(--bs-primary-rgb), 0.3);
+        }
+      }
+
+      .avatar-upload-btn {
+        position: absolute;
+        bottom: 5px;
+        right: calc(50% - 60px + 5px); // Center relative to avatar
+        background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-info) 100%);
+        color: white;
+        border: 2px solid white;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 3px 10px rgba(var(--bs-primary-rgb), 0.3);
+        transition: all 0.3s ease;
+        z-index: 10;
+
+        &:hover {
+          transform: scale(1.1);
+          box-shadow: 0 5px 15px rgba(var(--bs-primary-rgb), 0.4);
+        }
+
+        i {
+          font-size: 1rem;
+        }
+
+        span {
+          display: none; // Hide text on all screens for cleaner look
+        }
+      }
+    }
+
+    h4 {
+      font-weight: 600;
+      color: var(--pc-heading-color);
+      margin-top: 0.75rem;
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+      word-wrap: break-word;
+    }
+
+    p {
+      font-size: 0.9rem;
+      color: var(--bs-secondary-color);
+      margin-bottom: 0;
+      word-wrap: break-word;
+    }
+  }
+}
+
+// Account Info Card
+.account-info-card {
+  margin-top: 1.5rem;
+
+  .info-item {
+    padding: 0.875rem 0;
+    border-bottom: 1px solid var(--bs-border-color);
+
+    &:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    &:first-child {
+      padding-top: 0;
+    }
+
+    .info-label {
+      font-size: 0.875rem;
+      color: var(--bs-secondary-color);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      font-weight: 500;
+
+      i {
+        font-size: 1rem;
+        color: var(--bs-primary);
+        margin-right: 0.5rem;
+      }
+    }
+
+    .info-value {
+      font-size: 0.95rem;
+      color: var(--pc-heading-color);
+      font-weight: 500;
+      margin-left: 1.75rem; // Align with icon
+
+      .badge {
+        font-size: 0.8rem;
+        padding: 0.35em 0.65em;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Profile Form Card
+.profile-form-card {
+  .profile-tabs {
+    border-bottom: 1px solid var(--bs-border-color);
+    margin-bottom: 1.5rem;
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1.25rem;
+      color: var(--bs-secondary-color);
+      font-weight: 500;
+      border: none;
+      border-bottom: 2px solid transparent;
+      transition: all 0.3s ease;
+
+      i {
+        font-size: 1rem;
+      }
+
+      &:hover {
+        color: var(--bs-primary);
+        background-color: transparent;
+      }
+
+      &.active {
+        color: var(--bs-primary);
+        border-bottom-color: var(--bs-primary);
+        background-color: transparent;
+      }
+    }
+  }
+
+  .card-header {
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      transition: all 0.3s ease;
+
+      i {
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .form-group {
+    margin-bottom: 1.25rem;
+    .form-label {
+      font-weight: 600;
+      color: var(--pc-heading-color);
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+
+      .text-danger {
+        color: var(--bs-danger);
+      }
+    }
+
+    .input-wrapper {
+      &.input-group {
+        .form-control {
+          padding-left: 1rem;
+          padding-right: 1rem;
+          padding-top: 0.75rem;
+          padding-bottom: 0.75rem;
+          border-radius: 8px 0 0 8px;
+          border: 1px solid var(--bs-border-color);
+          border-right: none;
+          background-color: var(--bs-input-bg);
+          color: var(--bs-body-color);
+          transition: all 0.3s ease;
+
+          &:focus {
+            border-color: var(--bs-primary);
+            border-right: none;
+            box-shadow: none;
+            z-index: 3;
+          }
+
+          &[readonly] {
+            background-color: var(--bs-gray-100);
+            cursor: not-allowed;
+          }
+
+          &.is-invalid {
+            border-color: var(--bs-danger);
+            border-right: none;
+          }
+        }
+
+        .password-toggle {
+          &.input-group-text {
+            background-color: var(--bs-input-bg);
+            border: 1px solid var(--bs-border-color);
+            border-left: none;
+            border-radius: 0 8px 8px 0;
+            color: var(--bs-secondary-color);
+            cursor: pointer;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+
+            &:hover {
+              color: var(--bs-primary);
+              background-color: var(--bs-gray-50);
+            }
+
+            &:focus {
+              outline: none;
+              box-shadow: none;
+            }
+
+            i {
+              font-size: 1rem;
+            }
+          }
+        }
+
+        .form-control:focus + .password-toggle.input-group-text {
+          border-color: var(--bs-primary);
+          z-index: 3;
+        }
+
+        .form-control.is-invalid + .password-toggle.input-group-text {
+          border-color: var(--bs-danger);
+        }
+      }
+
+      // For non-input-group inputs (regular inputs)
+      &:not(.input-group) {
+        position: relative;
+        display: flex;
+        align-items: center;
+
+        .form-control {
+          padding-left: 1rem;
+          padding-right: 1rem;
+          padding-top: 0.75rem;
+          padding-bottom: 0.75rem;
+          border-radius: 8px;
+          border: 1px solid var(--bs-border-color);
+          background-color: var(--bs-input-bg);
+          color: var(--bs-body-color);
+          transition: all 0.3s ease;
+
+          &:focus {
+            border-color: var(--bs-primary);
+            box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+          }
+
+          &[readonly] {
+            background-color: var(--bs-gray-100);
+            cursor: not-allowed;
+          }
+
+          &.is-invalid {
+            border-color: var(--bs-danger);
+          }
+        }
+      }
+    }
+
+    .form-label {
+      i {
+        font-size: 1rem;
+        color: var(--bs-primary);
+      }
+    }
+
+    .invalid-feedback {
+      font-size: 0.875rem;
+      color: var(--bs-danger);
+      margin-top: 0.25rem;
+    }
+
+    .form-text {
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+  }
+
+  .form-actions {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--bs-border-color);
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+
+      &.btn-primary {
+        background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-info) 100%);
+        border: none;
+        color: white;
+        box-shadow: 0 4px 15px rgba(var(--bs-primary-rgb), 0.3);
+
+        &:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(var(--bs-primary-rgb), 0.4);
+        }
+
+        &:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+      }
+
+      &.btn-secondary {
+        background-color: var(--bs-gray-200);
+        border: 1px solid var(--bs-border-color);
+        color: var(--bs-body-color);
+
+        &:hover:not(:disabled) {
+          background-color: var(--bs-gray-300);
+        }
+      }
+    }
+  }
+
+  .alert {
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+
+    &.alert-success {
+      background-color: rgba(var(--bs-success-rgb), 0.1);
+      border: 1px solid rgba(var(--bs-success-rgb), 0.2);
+      color: var(--bs-success);
+
+      i {
+        font-size: 1rem;
+      }
+    }
+
+    &.alert-danger {
+      background-color: rgba(var(--bs-danger-rgb), 0.1);
+      border: 1px solid rgba(var(--bs-danger-rgb), 0.2);
+      color: var(--bs-danger);
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 992px) {
+  .profile-page {
+    .profile-avatar-card,
+    .account-info-card {
+      margin-bottom: 1.5rem;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .profile-page {
+    padding: 1rem 0;
+
+    .page-header {
+      .page-title {
+        font-size: 1.5rem;
+      }
+    }
+
+    .profile-avatar-card {
+      .avatar-section {
+        padding: 1.25rem 0.75rem;
+
+        .avatar-wrapper {
+          .avatar-img {
+            width: 100px;
+            height: 100px;
+          }
+
+          .avatar-upload-btn {
+            width: 32px;
+            height: 32px;
+            bottom: 3px;
+            right: calc(50% - 50px + 3px);
+
+            i {
+              font-size: 0.9rem;
+            }
+          }
+        }
+
+        h4 {
+          font-size: 1rem;
+        }
+
+        p {
+          font-size: 0.85rem;
+        }
+      }
+    }
+
+    .profile-form-card {
+      .form-actions {
+        flex-direction: column;
+
+        .btn {
+          width: 100%;
+        }
+      }
+    }
+  }
+}

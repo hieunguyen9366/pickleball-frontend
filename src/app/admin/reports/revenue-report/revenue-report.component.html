@@ -1,0 +1,217 @@
+<div class="revenue-report-page">
+  <div class="container-fluid">
+    <!-- Loading -->
+    <div class="row" *ngIf="isLoading && !report">
+      <div class="col-12">
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+          </div>
+          <p class="text-muted mt-3 mb-0">Đang tải báo cáo doanh thu...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div class="row" *ngIf="error && !isLoading">
+      <div class="col-12">
+        <div class="alert alert-danger">
+          {{ error }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="row" *ngIf="!isLoading && report">
+      <div class="col-12">
+        <app-card cardTitle="Báo cáo Doanh thu" [padding]="0">
+          <ng-template #headerOptionsTemplate>
+            <div class="d-flex align-items-center gap-2">
+              <button class="btn btn-sm btn-success" (click)="exportExcel()" *ngIf="report">
+                <i antIcon type="file-excel" theme="outline" class="me-1"></i> Xuất Excel
+              </button>
+              <button class="btn btn-sm btn-danger" (click)="exportPDF()" *ngIf="report">
+                <i antIcon type="file-pdf" theme="outline" class="me-1"></i> Xuất PDF
+              </button>
+            </div>
+          </ng-template>
+
+          <div class="p-3">
+            <!-- Filters -->
+            <div class="row g-3 mb-4">
+              <div class="col-md-2">
+                <label class="form-label">Kỳ báo cáo</label>
+                <select class="form-select" [(ngModel)]="period" (change)="onFilterChange()">
+                  <option value="day">Theo ngày</option>
+                  <option value="month">Theo tháng</option>
+                  <option value="year">Theo năm</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Từ ngày</label>
+                <input type="date" class="form-control" [(ngModel)]="startDate" (change)="onFilterChange()">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Đến ngày</label>
+                <input type="date" class="form-control" [(ngModel)]="endDate" (change)="onFilterChange()">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Cụm sân</label>
+                <select class="form-select" [(ngModel)]="selectedCourtGroupId" (change)="onFilterChange()">
+                  <option [value]="undefined">Tất cả cụm sân</option>
+                  <option *ngFor="let group of courtGroups" [value]="group.courtGroupId">
+                    {{ group.courtGroupName }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="row g-3 mb-4">
+              <div class="col-md-4">
+                <div class="card bg-primary text-white">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="flex-grow-1">
+                        <h6 class="text-white-50 mb-1">Tổng doanh thu</h6>
+                        <h3 class="mb-0">{{ report.totalRevenue | number:'1.0-0' }} ₫</h3>
+                      </div>
+                      <div>
+                        <i antIcon type="dollar" theme="outline" class="fs-1 opacity-50"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card bg-success text-white">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="flex-grow-1">
+                        <h6 class="text-white-50 mb-1">Tổng lượt đặt</h6>
+                        <h3 class="mb-0">{{ report.totalBookings }}</h3>
+                      </div>
+                      <div>
+                        <i antIcon type="calendar" theme="outline" class="fs-1 opacity-50"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card bg-info text-white">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="flex-grow-1">
+                        <h6 class="text-white-50 mb-1">Giá trị trung bình</h6>
+                        <h3 class="mb-0">{{ report.averageBookingValue | number:'1.0-0' }} ₫</h3>
+                      </div>
+                      <div>
+                        <i antIcon type="dollar" theme="outline" class="fs-1 opacity-50"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chart -->
+            <div class="mb-4" *ngIf="chartData">
+              <app-card cardTitle="Biểu đồ Doanh thu" [showHeader]="false">
+                <div class="chart-container">
+                  <p class="text-muted">Biểu đồ doanh thu theo thời gian</p>
+                  <div class="table-responsive">
+                    <table class="table table-sm">
+                      <thead>
+                        <tr>
+                          <th>Thời gian</th>
+                          <th class="text-end">Doanh thu</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let item of report.revenueByDate">
+                          <td>{{ item.date | date:'dd/MM/yyyy' }}</td>
+                          <td class="text-end">{{ item.revenue | number:'1.0-0' }} ₫</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </app-card>
+            </div>
+
+            <!-- Revenue by Date -->
+            <div class="mb-4" *ngIf="report.revenueByDate && report.revenueByDate.length > 0">
+              <h5 class="mb-3">Doanh thu theo ngày</h5>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Ngày</th>
+                      <th>Số lượt đặt</th>
+                      <th class="text-end">Doanh thu</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of report.revenueByDate">
+                      <td>{{ item.date | date:'dd/MM/yyyy' }}</td>
+                      <td>{{ item.bookingCount || 0 }}</td>
+                      <td class="text-end">{{ item.revenue || 0 | number:'1.0-0' }} ₫</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Revenue by Court Group -->
+            <div class="mb-4" *ngIf="report.revenueByCourtGroup && report.revenueByCourtGroup.length > 0">
+              <h5 class="mb-3">Doanh thu theo Cụm sân</h5>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Cụm sân</th>
+                      <th>Số lượt đặt</th>
+                      <th class="text-end">Doanh thu</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of report.revenueByCourtGroup">
+                      <td>{{ item.courtGroupName }}</td>
+                      <td>{{ item.bookingCount }}</td>
+                      <td class="text-end">{{ item.revenue | number:'1.0-0' }} ₫</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Revenue by Court -->
+            <div class="mb-4" *ngIf="report.revenueByCourt && report.revenueByCourt.length > 0">
+              <h5 class="mb-3">Doanh thu theo Sân</h5>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Sân</th>
+                      <th>Số lượt đặt</th>
+                      <th class="text-end">Doanh thu</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of report.revenueByCourt">
+                      <td>{{ item.courtName }}</td>
+                      <td>{{ item.bookingCount }}</td>
+                      <td class="text-end">{{ item.revenue | number:'1.0-0' }} ₫</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </app-card>
+      </div>
+    </div>
+  </div>
+</div>
+

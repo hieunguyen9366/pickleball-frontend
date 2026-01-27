@@ -1,0 +1,50 @@
+// Using global CSS custom properties instead of SCSS variables
+// These are provided by the global styles.scss
+
+.select-services-page {
+  padding: 2rem 0;
+  min-height: calc(100vh - 200px);
+  background-color: var(--bs-body-bg);
+
+  .container {
+    max-width: 1200px;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--pc-heading-color);
+      margin-bottom: 0;
+    }
+  }
+}
+
+.court-summary-card {
+  h5 {
+    font-weight: 600;
+  }
+}
+
+.service-card {
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.summary-card {
+  .h5 {
+    font-weight: 700;
+  }
+}
+
+.select-services-container {
+  padding: 2rem;
+}
+

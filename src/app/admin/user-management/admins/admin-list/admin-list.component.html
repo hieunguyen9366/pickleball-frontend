@@ -1,0 +1,62 @@
+<div class="admin-list-page">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <app-card cardTitle="Danh sách Quản trị viên" [padding]="0">
+          <ng-template #headerOptionsTemplate>
+            <button class="btn btn-primary" (click)="openModal()">
+              <i antIcon type="plus" theme="outline" class="me-1"></i> Thêm Admin
+            </button>
+          </ng-template>
+          
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Họ tên</th>
+                  <th>Email</th>
+                  <th>Số điện thoại</th>
+                  <th>Ngày tạo</th>
+                  <th class="text-end">Hành động</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let admin of admins">
+                  <td>#{{ admin.userId }}</td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <img src="assets/images/user/avatar-1.jpg" alt="user-image" class="user-avatar wid-35 rounded-circle" />
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0">{{ admin.fullName }}</h6>
+                        </div>
+                    </div>
+                  </td>
+                  <td>{{ admin.email }}</td>
+                  <td>{{ admin.phoneNumber }}</td>
+                  <td>{{ admin.createdAt | date:'dd/MM/yyyy' }}</td>
+                  <td class="text-end">
+                    <button class="btn btn-link-success btn-sm me-1" (click)="openModal(admin)" title="Chỉnh sửa">
+                      <i antIcon type="edit" theme="outline"></i>
+                    </button>
+                    <button class="btn btn-link-danger btn-sm" (click)="deleteAdmin(admin.userId!)" title="Xóa">
+                      <i antIcon type="delete" theme="outline"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="admins.length === 0 && !isLoading">
+                    <td colspan="6" class="text-center py-3">Chưa có quản trị viên nào.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </app-card>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+

@@ -1,0 +1,220 @@
+<div class="payment-page">
+  <div class="container pb-5">
+    <!-- Stepper -->
+    <div class="row mb-5">
+      <div class="col-12">
+        <div class="position-relative d-flex justify-content-between text-center mx-auto" style="max-width: 600px;">
+          <!-- Line -->
+          <div class="position-absolute top-50 start-0 translate-middle-y w-100 bg-light rounded"
+            style="height: 4px; z-index: 0;"></div>
+          <div class="position-absolute top-50 start-0 translate-middle-y bg-success rounded transition-width"
+            style="height: 4px; z-index: 0; width: 100%;"></div>
+
+          <!-- Step 1 -->
+          <div class="position-relative z-1">
+            <div
+              class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center mx-auto mb-2 shadow-sm"
+              style="width: 40px; height: 40px;">
+              <i antIcon type="check" theme="outline"></i>
+            </div>
+            <small class="fw-bold text-success">Chọn sân</small>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="position-relative z-1">
+            <div
+              class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center mx-auto mb-2 shadow-sm"
+              style="width: 40px; height: 40px;">
+              <i antIcon type="check" theme="outline"></i>
+            </div>
+            <small class="fw-bold text-success">Dịch vụ</small>
+          </div>
+
+          <!-- Step 3 (Active) -->
+          <div class="position-relative z-1">
+            <div
+              class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-2 shadow"
+              style="width: 40px; height: 40px;">
+              <span class="fw-bold">3</span>
+            </div>
+            <small class="fw-bold text-primary">Thanh toán</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Booking Timer -->
+    <div class="row mb-3" *ngIf="bookingTimerState.isActive">
+      <div class="col-12">
+        <div class="alert d-flex align-items-center justify-content-between mb-0"
+             [class.alert-warning]="bookingTimerState.remainingSeconds >= 60"
+             [class.alert-danger]="bookingTimerState.remainingSeconds < 60">
+          <div class="d-flex align-items-center">
+            <i antIcon type="clock-circle" theme="outline" class="me-2 fs-5"></i>
+            <div>
+              <strong>Thời gian hoàn tất đặt sân:</strong>
+              <span class="fw-bold fs-4 ms-2">{{ getBookingTimerText() }}</span>
+            </div>
+          </div>
+          <small class="text-muted" *ngIf="bookingTimerState.remainingSeconds < 60">
+            ⚠️ Sắp hết thời gian!
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-12 text-center">
+        <h3 class="fw-bold">Xác nhận thanh toán</h3>
+        <p class="text-muted">Vui lòng kiểm tra lại thông tin và chọn phương thức thanh toán.</p>
+      </div>
+    </div>
+
+    <div class="row g-5 justify-content-center">
+      <!-- Receipt / Summary -->
+      <div class="col-lg-5 order-lg-2">
+        <div class="card border-0 shadow-sm rounded-0 position-relative receipt-card">
+          <!-- Receipt Jagged Top -->
+          <div class="receipt-header bg-primary text-white p-4 text-center rounded-top">
+            <h5 class="mb-0 text-white">Hóa đơn đặt sân</h5>
+            <div class="opacity-50 small">Mã: #PENDING</div>
+          </div>
+
+          <div class="card-body p-4 bg-white">
+            <div class="text-center mb-4">
+              <h4 class="fw-bold mb-1">{{ selectedCourt?.courtName }}</h4>
+              <p class="text-muted small mb-0">{{ selectedCourt?.location }}</p>
+            </div>
+
+            <hr class="dashed-line">
+
+            <div class="row mb-3">
+              <div class="col-6">
+                <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Ngày</small>
+                <div class="fw-semibold">{{ bookingDate }}</div>
+              </div>
+              <div class="col-6 text-end">
+                <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Giờ</small>
+                <div class="fw-semibold">{{ startTime }} - {{ endTime }}</div>
+              </div>
+            </div>
+
+            <hr class="dashed-line">
+
+            <!-- Court Fee -->
+            <div class="d-flex justify-content-between mb-2">
+              <span>Tiền sân <small class="text-muted">({{ courtDurationHours }}h)</small></span>
+              <span class="fw-semibold">{{ courtTotal | number:'1.0-0' }}đ</span>
+            </div>
+
+            <!-- Services Fee -->
+            <div *ngIf="servicesTotal > 0">
+              <div class="d-flex justify-content-between mb-2" data-bs-toggle="collapse" href="#serviceDetails"
+                role="button">
+                <span>Tiền dịch vụ <i antIcon type="down-circle" theme="outline"
+                    class="small text-muted ms-1"></i></span>
+                <span class="fw-semibold">{{ servicesTotal | number:'1.0-0' }}đ</span>
+              </div>
+              <div class="collapse mb-2 ps-3 border-start py-1" id="serviceDetails">
+                <!-- Since we only have IDs here, ideally we should pass full objects or fetch them. 
+                                  For now simplfied display or just total. 
+                                  Optimizing: Just showing total is cleaner if list is long. -->
+                <small class="text-muted d-block">Đã bao gồm chi phí dịch vụ thêm.</small>
+              </div>
+            </div>
+
+            <hr class="dashed-line">
+
+            <!-- Grand Total -->
+            <div class="d-flex justify-content-between align-items-center mt-3">
+              <span class="h5 mb-0 fw-bold">Tổng cộng</span>
+              <span class="h4 mb-0 text-primary fw-bold">{{ grandTotal | number:'1.0-0' }}đ</span>
+            </div>
+          </div>
+
+          <!-- Receipt Jagged Bottom -->
+          <div class="receipt-footer position-absolute w-100 bottom-0 start-0"></div>
+        </div>
+      </div>
+
+      <!-- Payment Methods -->
+      <div class="col-lg-6 order-lg-1">
+        <app-card [showHeader]="false" style="overflow: visible;">
+          <h5 class="fw-bold mb-4">Phương thức thanh toán</h5>
+
+          <div class="d-flex flex-column gap-3">
+            <!-- Techcombank / QR Code -->
+            <label
+              class="payment-option p-3 border rounded cursor-pointer d-flex align-items-center gap-3 transition-all"
+              [class.border-primary]="paymentMethod === 'MOMO'" [class.bg-primary-subtle]="paymentMethod === 'MOMO'">
+              <input type="radio" name="paymentMethod" class="form-check-input mt-0" [(ngModel)]="paymentMethod"
+                value="MOMO">
+              <div class="bg-white p-2 rounded border">
+                <i antIcon type="qrcode" theme="outline" class="fs-4 text-dark"></i>
+              </div>
+              <div class="flex-grow-1">
+                <div class="fw-bold">Chuyển khoản / QR Code</div>
+                <div class="small text-muted">Quét mã VietQR (Techcombank/Momo)</div>
+              </div>
+            </label>
+
+            <!-- Credit Card -->
+            <label
+              class="payment-option p-3 border rounded cursor-pointer d-flex align-items-center gap-3 transition-all"
+              [class.border-primary]="paymentMethod === 'CREDIT_CARD'"
+              [class.bg-primary-subtle]="paymentMethod === 'CREDIT_CARD'">
+              <input type="radio" name="paymentMethod" class="form-check-input mt-0" [(ngModel)]="paymentMethod"
+                value="CREDIT_CARD">
+              <div class="bg-white p-2 rounded border">
+                <i antIcon type="credit-card" theme="outline" class="fs-4 text-primary"></i>
+              </div>
+              <div class="flex-grow-1">
+                <div class="fw-bold">Thẻ thanh toán quốc tế</div>
+                <div class="small text-muted">Visa, Mastercard, JCB</div>
+              </div>
+            </label>
+
+            <!-- Cash -->
+            <label
+              class="payment-option p-3 border rounded cursor-pointer d-flex align-items-center gap-3 transition-all"
+              [class.border-primary]="paymentMethod === 'CASH'" [class.bg-primary-subtle]="paymentMethod === 'CASH'">
+              <input type="radio" name="paymentMethod" class="form-check-input mt-0" [(ngModel)]="paymentMethod"
+                value="CASH">
+              <div class="bg-white p-2 rounded border">
+                <i antIcon type="bank" theme="outline" class="fs-4 text-success"></i>
+              </div>
+              <div class="flex-grow-1">
+                <div class="fw-bold">Thanh toán tại sân</div>
+                <div class="small text-muted">Trả tiền mặt khi đến check-in</div>
+              </div>
+            </label>
+          </div>
+
+          <!-- Error Message -->
+          <div *ngIf="error" class="alert alert-danger mt-4 mb-0">
+            <i antIcon type="exclamation-circle" theme="outline" class="me-2"></i> {{ error }}
+          </div>
+
+          <!-- Actions -->
+          <div class="mt-4 pt-3 border-top">
+            <button class="btn btn-primary w-100 py-3 fw-bold shadow-sm" (click)="confirmPayment()"
+              [disabled]="isProcessing">
+              <span *ngIf="isProcessing">
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Đang xử lý thanh toán...
+              </span>
+              <span *ngIf="!isProcessing">
+                Xác nhận thanh toán {{ grandTotal | number:'1.0-0' }}đ
+              </span>
+            </button>
+            <div class="text-center mt-3">
+              <a href="javascript:void(0)" class="text-muted small text-decoration-none" (click)="goBack()">
+                <i antIcon type="arrow-left" theme="outline" class="me-1"></i> Quay lại bước trước
+              </a>
+            </div>
+          </div>
+        </app-card>
+      </div>
+    </div>
+  </div>
+</div>

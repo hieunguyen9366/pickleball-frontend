@@ -1,0 +1,87 @@
+<app-card cardTitle="Quản lý Dịch vụ đi kèm" [padding]="0">
+    <div class="p-3">
+        <!-- Filter by Court Group -->
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label class="form-label">Lọc theo cụm sân</label>
+                <select class="form-select" [(ngModel)]="selectedCourtGroupId" (ngModelChange)="onCourtGroupChange()">
+                    <option [value]="-1">Tất cả cụm sân</option>
+                    <option *ngFor="let group of courtGroups" [value]="group.courtGroupId">
+                        {{ group.courtGroupName }}
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-8 d-flex align-items-end justify-content-end">
+                <button class="btn btn-primary" (click)="openModal()">
+                    <i antIcon type="plus" theme="outline" class="me-2"></i>
+                    Thêm dịch vụ mới
+                </button>
+            </div>
+        </div>
+
+        <!-- Services Table -->
+        <div class="table-responsive" *ngIf="!isLoading">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên dịch vụ</th>
+                        <th>Cụm sân</th>
+                        <th>Mô tả</th>
+                        <th>Giá</th>
+                        <th>Đơn vị</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let service of services">
+                        <td>#{{ service.serviceId }}</td>
+                        <td>
+                            <strong>{{ service.serviceName }}</strong>
+                        </td>
+                        <td>
+                            <span class="badge bg-light-primary">
+                                {{ service.courtGroupName || 'N/A' }}
+                            </span>
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ service.description || '-' }}</small>
+                        </td>
+                        <td>{{ service.price | number }} VND</td>
+                        <td>{{ service.unit }}</td>
+                        <td>
+                            <span [ngClass]="getStatusClass(service.status)">
+                                {{ service.status === 'AVAILABLE' ? 'Khả dụng' : 'Không khả dụng' }}
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <button class="btn btn-link-primary btn-sm" (click)="openModal(service)" title="Chỉnh sửa">
+                                <i antIcon type="edit" theme="outline"></i>
+                            </button>
+                            <button class="btn btn-link-danger btn-sm" (click)="deleteService(service.serviceId!)"
+                                title="Xóa">
+                                <i antIcon type="delete" theme="outline"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr *ngIf="services.length === 0">
+                        <td colspan="8" class="text-center py-4">
+                            <span class="text-muted">
+                                {{ selectedCourtGroupId ? 'Không có dịch vụ nào cho cụm sân này' : 'Chưa có dịch vụ nào.
+                                Hãy thêm dịch vụ mới.' }}
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tải...</span>
+            </div>
+        </div>
+    </div>
+</app-card>

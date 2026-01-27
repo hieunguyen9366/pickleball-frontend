@@ -1,0 +1,118 @@
+<div class="auth-page">
+  <div class="auth-container">
+    <div class="auth-card-wrapper">
+      <!-- Logo/Brand -->
+      <div class="auth-header text-center mb-4">
+        <a routerLink="/player/landing" class="auth-logo">
+          <h2 class="mb-0">Pickleball Court</h2>
+        </a>
+        <p class="text-muted mt-2 mb-0">Đăng nhập vào tài khoản của bạn</p>
+      </div>
+
+      <!-- Login Card -->
+      <app-card [showHeader]="false" blockClass="auth-card">
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+          <!-- Error Message -->
+          <div class="alert alert-danger" *ngIf="errorMessage" role="alert">
+            <i antIcon type="close-circle" theme="fill" class="me-2"></i>
+            {{ errorMessage }}
+          </div>
+
+          <!-- Email Field -->
+          <div class="form-group mb-3">
+            <label class="form-label f-w-600" for="email">
+              Email <span class="text-danger">*</span>
+            </label>
+            <div class="input-wrapper">
+              <i antIcon type="mail" theme="outline" class="input-icon"></i>
+              <input type="email" id="email" formControlName="email" class="form-control"
+                [class.is-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+                placeholder="Nhập email của bạn" autocomplete="email" />
+            </div>
+            <div class="invalid-feedback d-block"
+              *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+              <div *ngIf="loginForm.get('email')?.errors?.['required']">Email là bắt buộc</div>
+              <div *ngIf="loginForm.get('email')?.errors?.['email']">Email không hợp lệ</div>
+            </div>
+          </div>
+
+          <!-- Password Field -->
+          <div class="form-group mb-3">
+            <label class="form-label f-w-600" for="password">
+              Mật khẩu <span class="text-danger">*</span>
+            </label>
+            <div class="input-wrapper">
+              <i antIcon type="lock" theme="outline" class="input-icon"></i>
+              <input [type]="showPassword ? 'text' : 'password'" id="password" formControlName="password"
+                class="form-control"
+                [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+                placeholder="Nhập mật khẩu" autocomplete="current-password" />
+              <button type="button" class="password-toggle" (click)="togglePasswordVisibility()" tabindex="-1">
+                <i antIcon [type]="showPassword ? 'eye-invisible' : 'eye'" theme="outline"></i>
+              </button>
+            </div>
+            <div class="invalid-feedback d-block"
+              *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+              <div *ngIf="loginForm.get('password')?.errors?.['required']">Mật khẩu là bắt buộc</div>
+              <div *ngIf="loginForm.get('password')?.errors?.['minlength']">Mật khẩu phải có ít nhất 6 ký tự</div>
+            </div>
+          </div>
+
+          <!-- Remember Me & Forgot Password -->
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="rememberMe" formControlName="rememberMe"
+                [checked]="rememberMe" (change)="rememberMe = $any($event.target).checked">
+              <label class="form-check-label text-muted" for="rememberMe">
+                Ghi nhớ đăng nhập
+              </label>
+            </div>
+            <a routerLink="/player/forgot-password" class="forgot-password-link">
+              Quên mật khẩu?
+            </a>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="d-grid mb-4">
+            <button type="submit" class="btn btn-primary btn-lg" [disabled]="loginForm.invalid || isLoading">
+              <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+              <i antIcon type="login" theme="outline" class="me-2" *ngIf="!isLoading"></i>
+              <span>{{ isLoading ? 'Đang xử lý...' : 'Đăng nhập' }}</span>
+            </button>
+          </div>
+
+          <!-- Divider -->
+          <div class="divider">
+            <span>Hoặc</span>
+          </div>
+
+          <!-- Social Login (Optional) -->
+          <div class="social-login mt-4">
+            <div class="row g-2">
+              <div class="col-6">
+                <button type="button" class="btn btn-outline-secondary w-100" disabled>
+                  <i antIcon type="google-circle" theme="fill" class="me-2"></i>
+                  <span>Google</span>
+                </button>
+              </div>
+              <div class="col-6">
+                <button type="button" class="btn btn-outline-secondary w-100" disabled>
+                  <i antIcon type="facebook" theme="fill" class="me-2"></i>
+                  <span>Facebook</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Register Link -->
+          <div class="auth-footer text-center mt-4">
+            <p class="text-muted mb-0">
+              Chưa có tài khoản?
+              <a routerLink="/player/register" class="link-primary f-w-600">Đăng ký ngay</a>
+            </p>
+          </div>
+        </form>
+      </app-card>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,110 @@
+<div class="cancel-booking-page">
+  <div class="container">
+    <!-- Page Header -->
+    <div class="row">
+      <div class="col-12">
+        <div class="page-header mb-4">
+          <button class="btn btn-link p-0 mb-2" (click)="goBack()">
+            <i antIcon type="arrow-left" theme="outline" class="me-2"></i>
+            Quay lại
+          </button>
+          <h2 class="page-title">
+            <i antIcon type="delete" theme="outline" class="me-2"></i>
+            Hủy đặt sân
+          </h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cancel Booking Form -->
+    <div class="row">
+      <div class="col-lg-8 col-md-12 mx-auto">
+        <!-- Loading State -->
+        <div class="text-center py-5" *ngIf="isLoading">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+          </div>
+          <p class="text-muted mt-3">Đang tải thông tin đặt sân...</p>
+        </div>
+
+        <!-- Error State -->
+        <div class="alert alert-danger" role="alert" *ngIf="error && !isLoading && !success">
+          <i antIcon type="exclamation-circle" theme="outline" class="me-2"></i>
+          {{ error }}
+        </div>
+
+        <!-- Success State -->
+        <div class="alert alert-success" role="alert" *ngIf="success">
+          <i antIcon type="check-circle" theme="outline" class="me-2"></i>
+          <strong>Hủy đặt sân thành công!</strong> Bạn sẽ được chuyển về danh sách đặt sân trong giây lát...
+        </div>
+
+        <!-- Booking Info Card -->
+        <app-card cardTitle="Thông tin đặt sân" [showHeader]="true" blockClass="mb-4" *ngIf="!isLoading && !error && booking && !success">
+          <div class="booking-info">
+            <div class="info-item mb-3">
+              <strong>Mã đặt sân:</strong> #{{ booking.bookingId }}
+            </div>
+            <div class="info-item mb-3">
+              <strong>Sân:</strong> {{ booking.court?.courtName || 'N/A' }}
+            </div>
+            <div class="info-item mb-3">
+              <strong>Ngày đặt:</strong> {{ getFormattedDate(booking.bookingDate) }}
+            </div>
+            <div class="info-item mb-3">
+              <strong>Khung giờ:</strong> {{ getFormattedTime(booking.startTime) }} - {{ getFormattedTime(booking.endTime) }}
+            </div>
+            <div class="info-item">
+              <strong>Tổng tiền:</strong> 
+              <span class="text-primary f-w-600">{{ getFormattedPrice(booking.totalPrice) }}</span>
+            </div>
+          </div>
+        </app-card>
+
+        <!-- Cancel Form Card -->
+        <app-card [showHeader]="false" blockClass="cancel-form-card" *ngIf="!isLoading && !error && booking && !success">
+          <div class="alert alert-warning mb-4">
+            <i antIcon type="exclamation-circle" theme="outline" class="me-2"></i>
+            <strong>Lưu ý:</strong> Việc hủy đặt sân có thể áp dụng phí hủy theo chính sách của hệ thống. 
+            Số tiền hoàn lại sẽ được xử lý trong vòng 3-5 ngày làm việc.
+          </div>
+
+          <form [formGroup]="cancelForm" (ngSubmit)="onSubmit()">
+            <div class="form-group mb-4">
+              <label class="form-label f-w-600" for="reason">
+                Lý do hủy (tùy chọn)
+              </label>
+              <textarea
+                id="reason"
+                formControlName="reason"
+                class="form-control"
+                rows="4"
+                placeholder="Nhập lý do hủy đặt sân (tối đa 500 ký tự)"
+                [class.is-invalid]="cancelForm.get('reason')?.invalid && cancelForm.get('reason')?.touched"></textarea>
+              <div class="invalid-feedback d-block" *ngIf="cancelForm.get('reason')?.invalid && cancelForm.get('reason')?.touched">
+                <div *ngIf="cancelForm.get('reason')?.errors?.['maxlength']">
+                  Lý do không được vượt quá 500 ký tự
+                </div>
+              </div>
+              <small class="form-text text-muted">
+                {{ cancelForm.get('reason')?.value?.length || 0 }}/500 ký tự
+              </small>
+            </div>
+
+            <div class="form-actions d-flex gap-2 justify-content-end">
+              <button type="button" class="btn btn-secondary" (click)="goBack()" [disabled]="isCancelling">
+                Hủy
+              </button>
+              <button type="submit" class="btn btn-danger" [disabled]="cancelForm.invalid || isCancelling">
+                <span *ngIf="isCancelling" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <i antIcon type="delete" theme="outline" class="me-2" *ngIf="!isCancelling"></i>
+                <span *ngIf="!isCancelling">Xác nhận hủy đặt sân</span>
+                <span *ngIf="isCancelling">Đang xử lý...</span>
+              </button>
+            </div>
+          </form>
+        </app-card>
+      </div>
+    </div>
+  </div>
+</div>

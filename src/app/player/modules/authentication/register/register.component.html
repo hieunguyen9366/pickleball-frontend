@@ -1,0 +1,198 @@
+<div class="auth-page">
+  <div class="auth-container">
+    <div class="auth-card-wrapper">
+      <!-- Logo/Brand -->
+      <div class="auth-header text-center mb-4">
+        <a routerLink="/player/landing" class="auth-logo">
+          <h2 class="mb-0">Pickleball Court</h2>
+        </a>
+        <p class="text-muted mt-2 mb-0">Tạo tài khoản mới để bắt đầu</p>
+      </div>
+
+      <!-- Register Card -->
+      <app-card [showHeader]="false" blockClass="auth-card">
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form">
+          <!-- Error Message -->
+          <div class="alert alert-danger" *ngIf="errorMessage" role="alert">
+            <i antIcon type="close-circle" theme="fill" class="me-2"></i>
+            {{ errorMessage }}
+          </div>
+
+          <!-- Full Name Field -->
+          <div class="form-group mb-3">
+            <label class="form-label f-w-600" for="fullName">
+              Họ và tên <span class="text-danger">*</span>
+            </label>
+            <div class="input-wrapper">
+              <i antIcon type="user" theme="outline" class="input-icon"></i>
+              <input
+                type="text"
+                id="fullName"
+                formControlName="fullName"
+                class="form-control"
+                [class.is-invalid]="registerForm.get('fullName')?.invalid && registerForm.get('fullName')?.touched"
+                placeholder="Nhập họ và tên của bạn"
+                autocomplete="name"
+              />
+            </div>
+            <div class="invalid-feedback d-block" *ngIf="registerForm.get('fullName')?.invalid && registerForm.get('fullName')?.touched">
+              <div *ngIf="registerForm.get('fullName')?.errors?.['required']">Họ và tên là bắt buộc</div>
+              <div *ngIf="registerForm.get('fullName')?.errors?.['minlength']">Họ và tên phải có ít nhất 2 ký tự</div>
+            </div>
+          </div>
+
+          <!-- Email Field -->
+          <div class="form-group mb-3">
+            <label class="form-label f-w-600" for="email">
+              Email <span class="text-danger">*</span>
+            </label>
+            <div class="input-wrapper">
+              <i antIcon type="mail" theme="outline" class="input-icon"></i>
+              <input
+                type="email"
+                id="email"
+                formControlName="email"
+                class="form-control"
+                [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+                placeholder="Nhập email của bạn"
+                autocomplete="email"
+              />
+            </div>
+            <div class="invalid-feedback d-block" *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+              <div *ngIf="registerForm.get('email')?.errors?.['required']">Email là bắt buộc</div>
+              <div *ngIf="registerForm.get('email')?.errors?.['email']">Email không hợp lệ</div>
+            </div>
+          </div>
+
+          <!-- Phone Number Field -->
+          <div class="form-group mb-3">
+            <label class="form-label f-w-600" for="phoneNumber">
+              Số điện thoại <span class="text-danger">*</span>
+            </label>
+            <div class="input-wrapper">
+              <i antIcon type="phone" theme="outline" class="input-icon"></i>
+              <input
+                type="tel"
+                id="phoneNumber"
+                formControlName="phoneNumber"
+                class="form-control"
+                [class.is-invalid]="registerForm.get('phoneNumber')?.invalid && registerForm.get('phoneNumber')?.touched"
+                placeholder="Nhập số điện thoại (10-11 số)"
+                autocomplete="tel"
+              />
+            </div>
+            <div class="invalid-feedback d-block" *ngIf="registerForm.get('phoneNumber')?.invalid && registerForm.get('phoneNumber')?.touched">
+              <div *ngIf="registerForm.get('phoneNumber')?.errors?.['required']">Số điện thoại là bắt buộc</div>
+              <div *ngIf="registerForm.get('phoneNumber')?.errors?.['pattern']">Số điện thoại không hợp lệ (10-11 số)</div>
+            </div>
+          </div>
+
+          <!-- Password Field -->
+          <div class="form-group mb-3">
+            <label class="form-label f-w-600" for="password">
+              Mật khẩu <span class="text-danger">*</span>
+            </label>
+            <div class="input-wrapper">
+              <i antIcon type="lock" theme="outline" class="input-icon"></i>
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                id="password"
+                formControlName="password"
+                class="form-control"
+                [class.is-invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+                placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
+                autocomplete="new-password"
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="togglePasswordVisibility()"
+                tabindex="-1">
+                <i antIcon [type]="showPassword ? 'eye-invisible' : 'eye'" theme="outline"></i>
+              </button>
+            </div>
+            <div class="invalid-feedback d-block" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+              <div *ngIf="registerForm.get('password')?.errors?.['required']">Mật khẩu là bắt buộc</div>
+              <div *ngIf="registerForm.get('password')?.errors?.['minlength']">Mật khẩu phải có ít nhất 6 ký tự</div>
+            </div>
+          </div>
+
+          <!-- Confirm Password Field -->
+          <div class="form-group mb-4">
+            <label class="form-label f-w-600" for="confirmPassword">
+              Xác nhận mật khẩu <span class="text-danger">*</span>
+            </label>
+            <div class="input-wrapper">
+              <i antIcon type="lock" theme="outline" class="input-icon"></i>
+              <input
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                id="confirmPassword"
+                formControlName="confirmPassword"
+                class="form-control"
+                [class.is-invalid]="(registerForm.get('confirmPassword')?.invalid || registerForm.errors?.['passwordMismatch']) && registerForm.get('confirmPassword')?.touched"
+                placeholder="Nhập lại mật khẩu"
+                autocomplete="new-password"
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="toggleConfirmPasswordVisibility()"
+                tabindex="-1">
+                <i antIcon [type]="showConfirmPassword ? 'eye-invisible' : 'eye'" theme="outline"></i>
+              </button>
+            </div>
+            <div class="invalid-feedback d-block" *ngIf="(registerForm.get('confirmPassword')?.invalid || registerForm.errors?.['passwordMismatch']) && registerForm.get('confirmPassword')?.touched">
+              <div *ngIf="registerForm.get('confirmPassword')?.errors?.['required']">Xác nhận mật khẩu là bắt buộc</div>
+              <div *ngIf="registerForm.errors?.['passwordMismatch'] && registerForm.get('confirmPassword')?.touched">
+                Mật khẩu không khớp
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="d-grid mb-4">
+            <button
+              type="submit"
+              class="btn btn-primary btn-lg"
+              [disabled]="registerForm.invalid || isLoading">
+              <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+              <i antIcon type="user-add" theme="outline" class="me-2" *ngIf="!isLoading"></i>
+              <span>{{ isLoading ? 'Đang xử lý...' : 'Đăng ký' }}</span>
+            </button>
+          </div>
+
+          <!-- Divider -->
+          <div class="divider">
+            <span>Hoặc</span>
+          </div>
+
+          <!-- Social Register (Optional) -->
+          <div class="social-login mt-4">
+            <div class="row g-2">
+              <div class="col-6">
+              <button type="button" class="btn btn-outline-secondary w-100" disabled>
+                <i antIcon type="google-circle" theme="fill" class="me-2"></i>
+                <span>Google</span>
+              </button>
+            </div>
+            <div class="col-6">
+              <button type="button" class="btn btn-outline-secondary w-100" disabled>
+                <i antIcon type="facebook" theme="fill" class="me-2"></i>
+                <span>Facebook</span>
+              </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Login Link -->
+          <div class="auth-footer text-center mt-4">
+            <p class="text-muted mb-0">
+              Đã có tài khoản?
+              <a routerLink="/player/login" class="link-primary f-w-600">Đăng nhập ngay</a>
+            </p>
+          </div>
+        </form>
+      </app-card>
+    </div>
+  </div>
+</div>

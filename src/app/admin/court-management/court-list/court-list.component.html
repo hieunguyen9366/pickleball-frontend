@@ -1,0 +1,74 @@
+<div class="row">
+    <div class="col-sm-12">
+        <app-card cardTitle="Danh sách sân" [padding]="0">
+            <ng-template #headerOptionsTemplate>
+                <button class="btn btn-primary" (click)="openModal()">
+                    <i antIcon type="plus" theme="outline" class="me-1"></i> Thêm Mới
+                </button>
+            </ng-template>
+
+            <!-- Loading State -->
+            <div *ngIf="isLoading" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+                <p class="text-muted mt-3 mb-0">Đang tải danh sách sân...</p>
+            </div>
+
+            <!-- Error State -->
+            <div *ngIf="error && !isLoading" class="alert alert-danger m-3">
+                {{ error }}
+            </div>
+
+            <!-- Content - Card Grid -->
+            <div *ngIf="!isLoading && !error" class="p-3" (click)="closeOptionsMenu()">
+                <div class="row g-3">
+                    <div class="col-lg-3 col-md-4 col-sm-6" *ngFor="let court of courts">
+                        <div class="court-card">
+                            <div class="court-card-image-wrapper">
+                                <img [src]="getCourtImage(court)" [alt]="court.courtName" class="court-card-image">
+                                <div class="court-card-options">
+                                    <button class="btn btn-sm btn-light rounded-circle p-0 court-options-btn"
+                                        (click)="toggleOptionsMenu(court.courtId, $event)" title="Tùy chọn">
+                                        <i antIcon type="more" theme="outline"></i>
+                                    </button>
+                                    <div class="court-options-menu" *ngIf="showOptionsMenu[court.courtId]"
+                                        (click)="$event.stopPropagation()">
+                                        <button class="dropdown-item" (click)="openModal(court); closeOptionsMenu()">
+                                            <i antIcon type="edit" theme="outline" class="me-2"></i> Chỉnh sửa
+                                        </button>
+                                        <button class="dropdown-item text-danger"
+                                            (click)="deleteCourt(court.courtId); closeOptionsMenu()">
+                                            <i antIcon type="delete" theme="outline" class="me-2"></i> Xóa
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="court-card-body">
+                                <h6 class="court-card-title">{{ court.courtName || 'N/A' }}</h6>
+                                <p class="court-card-location text-muted mb-2">
+                                    <small>{{ getLocation(court) }}</small>
+                                </p>
+                                <div class="court-card-rating">
+                                    <i antIcon type="star" [theme]="i <= getRating(court) ? 'fill' : 'outline'"
+                                        *ngFor="let i of [1,2,3,4,5]" [class.text-warning]="i <= getRating(court)"
+                                        [class.text-muted]="i > getRating(court)"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div *ngIf="courts.length === 0" class="col-12">
+                        <div class="text-center p-5">
+                            <p class="text-muted mb-3">Chưa có sân nào.</p>
+                            <button class="btn btn-primary" (click)="openModal()">
+                                <i antIcon type="plus" theme="outline" class="me-1"></i> Thêm sân đầu tiên
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </app-card>
+    </div>
+</div>
