@@ -1,0 +1,149 @@
+.court-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+}
+
+.court-card-image-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 75%; // 4:3 aspect ratio
+    overflow: hidden;
+    background-color: #f0f0f0;
+}
+
+.court-card-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.court-card-options {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 10;
+}
+
+.court-options-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+        background: #fff !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    i {
+        font-size: 16px;
+        color: #007bff;
+    }
+}
+
+.court-options-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 150px;
+    z-index: 1000;
+    padding: 4px 0;
+
+    .dropdown-item {
+        padding: 8px 16px;
+        border: none;
+        background: transparent;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        color: #333;
+
+        &:hover {
+            background-color: #f8f9fa;
+        }
+
+        i {
+            font-size: 14px;
+        }
+
+        &.text-danger {
+            color: #dc3545 !important;
+
+            &:hover {
+                background-color: #fff5f5;
+            }
+        }
+    }
+}
+
+.court-card-body {
+    padding: 16px;
+}
+
+.court-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #333;
+    line-height: 1.4;
+}
+
+.court-card-location {
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.court-card-rating {
+    display: flex;
+    gap: 2px;
+
+    i {
+        font-size: 14px;
+
+        &.text-warning {
+            color: #ffc107;
+        }
+
+        &.text-muted {
+            color: #dee2e6;
+        }
+    }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+    .court-card-image-wrapper {
+        padding-top: 70%;
+    }
+
+    .court-card-body {
+        padding: 12px;
+    }
+
+    .court-card-title {
+        font-size: 14px;
+    }
+}

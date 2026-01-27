@@ -1,0 +1,286 @@
+<div class="search-page-container">
+  <div class="container py-4">
+    <!-- Header -->
+    <div class="row align-items-center mb-4">
+      <div class="col-md-6">
+        <h2 class="mb-1">
+          <i antIcon type="search" theme="outline" class="me-2" style="color: var(--bs-primary);"></i>
+          Tìm kiếm sân
+        </h2>
+        <p class="text-muted mb-0">Khám phá các sân Pickleball tốt nhất gần bạn</p>
+      </div>
+      <div class="col-md-6 text-md-end mt-3 mt-md-0">
+        <!-- Optional Top Search Bar if needed -->
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Sidebar Filters -->
+      <div class="col-lg-3 col-md-4 mb-4">
+        <app-card [showHeader]="true" cardTitle="Bộ lọc" blockClass="filter-card-body"
+          cardClass="h-100 shadow-sm border-0">
+          <form [formGroup]="filterForm">
+            <!-- Search Term -->
+            <div class="mb-4">
+              <label class="form-label fw-bold small text-uppercase text-muted">Từ khóa</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0">
+                  <i antIcon type="search" theme="outline"></i>
+                </span>
+                <input type="text" class="form-control bg-light border-start-0 ps-0" placeholder="Tên sân, địa chỉ..."
+                  formControlName="searchTerm">
+              </div>
+            </div>
+
+            <hr class="my-3 opacity-25">
+
+            <!-- Time Filter -->
+            <div class="mb-4">
+              <label class="form-label fw-bold small text-uppercase text-muted">Thời gian</label>
+              
+              <!-- Quick Filters -->
+              <div class="d-flex flex-wrap gap-2 mb-2">
+                <button type="button" class="btn btn-sm btn-outline-primary" 
+                  (click)="setQuickDate('today')">Hôm nay</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" 
+                  (click)="setQuickDate('tomorrow')">Ngày mai</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" 
+                  (click)="setQuickTime('morning')">Sáng</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" 
+                  (click)="setQuickTime('afternoon')">Chiều</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" 
+                  (click)="setQuickTime('evening')">Tối</button>
+              </div>
+              
+              <div class="mb-2">
+                <input type="date" class="form-control" formControlName="date">
+              </div>
+              <div class="row g-2">
+                <div class="col-6">
+                  <select class="form-select form-select-sm" formControlName="startTime">
+                    <option [ngValue]="null">Bắt đầu</option>
+                    <option *ngFor="let h of [5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22]" 
+                      [value]="(h < 10 ? '0' : '') + h + ':00'">
+                      {{ (h < 10 ? '0' : '') + h }}:00
+                    </option>
+                  </select>
+                </div>
+                <div class="col-6">
+                  <select class="form-select form-select-sm" formControlName="endTime">
+                    <option [ngValue]="null">Kết thúc</option>
+                    <option *ngFor="let h of [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]" 
+                      [value]="(h < 10 ? '0' : '') + h + ':00'">
+                      {{ (h < 10 ? '0' : '') + h }}:00
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <hr class="my-3 opacity-25">
+
+            <!-- Location -->
+            <div class="mb-4">
+              <label class="form-label fw-bold small text-uppercase text-muted">Khu vực</label>
+              <select class="form-select" formControlName="district">
+                <option value="">Tất cả khu vực</option>
+                <option *ngFor="let dist of districts" [value]="dist">{{ dist }}</option>
+              </select>
+              <small class="text-muted" *ngIf="districts.length === 0">Đang tải...</small>
+            </div>
+
+            <hr class="my-3 opacity-25">
+
+            <!-- Price Range -->
+            <div class="mb-4">
+              <label class="form-label fw-bold small text-uppercase text-muted">Mức giá (/giờ)</label>
+              <div class="row g-2">
+                <div class="col-6">
+                  <input type="number" class="form-control form-control-sm" placeholder="Từ" formControlName="minPrice">
+                </div>
+                <div class="col-6">
+                  <input type="number" class="form-control form-control-sm" placeholder="Đến"
+                    formControlName="maxPrice">
+                </div>
+              </div>
+            </div>
+
+            <hr class="my-3 opacity-25">
+
+            <!-- Amenities -->
+            <div class="mb-4" *ngIf="amenitiesList.length > 0">
+              <label class="form-label fw-bold small text-uppercase text-muted">Tiện ích</label>
+              <div class="d-flex flex-column gap-2" style="max-height: 200px; overflow-y: auto;">
+                <div class="form-check" *ngFor="let amenity of amenitiesList">
+                  <input class="form-check-input" type="checkbox" [value]="amenity" 
+                    [id]="'amenity-' + amenity"
+                    [checked]="filterForm.get('amenities')?.value?.includes(amenity)"
+                    (change)="toggleAmenity(amenity, $event)">
+                  <label class="form-check-label" [for]="'amenity-' + amenity">
+                    {{ amenity }}
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <hr class="my-3 opacity-25" *ngIf="amenitiesList.length > 0">
+
+            <!-- Rating -->
+            <div class="mb-4">
+              <label class="form-label fw-bold small text-uppercase text-muted">Đánh giá</label>
+              <div class="d-flex flex-column gap-2">
+                <div class="form-check" *ngFor="let r of [5,4,3,2]">
+                  <input class="form-check-input" type="radio" name="rating" [value]="r" formControlName="rating"
+                    [id]="'rating'+r">
+                  <label class="form-check-label d-flex align-items-center" [for]="'rating'+r">
+                    <span class="me-2">{{ r }} sao trở lên</span>
+                    <div class="text-warning small">
+                      <i antIcon type="star" theme="fill" *ngFor="let i of [].constructor(r)"></i>
+                    </div>
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="rating" [value]="0" formControlName="rating"
+                    id="rating0">
+                  <label class="form-check-label" for="rating0">Tất cả</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-grid gap-2">
+              <button type="button" class="btn btn-outline-secondary btn-sm" (click)="resetFilters()">
+                <i antIcon type="undo" theme="outline" class="me-1"></i> Đặt lại
+              </button>
+            </div>
+
+          </form>
+        </app-card>
+      </div>
+
+      <!-- Results Grid -->
+      <div class="col-lg-9 col-md-8">
+        <!-- Toolbar -->
+        <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-white rounded shadow-sm border">
+          <div>
+            <span class="fw-bold">{{ collectionSize }}</span> kết quả tìm thấy
+          </div>
+          <div class="d-flex align-items-center">
+            <label class="me-2 text-muted small">Sắp xếp:</label>
+            <select class="form-select form-select-sm" style="width: 150px;" (change)="onSortChange($event)">
+              <option value="default">Mặc định</option>
+              <option value="price_low">Giá thấp đến cao</option>
+              <option value="price_high">Giá cao đến thấp</option>
+              <option value="rating">Đánh giá cao nhất</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="isLoading && filteredCourts.length === 0" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="mt-2 text-muted">Đang tải danh sách sân...</p>
+        </div>
+        
+        <!-- Loading Skeleton -->
+        <div *ngIf="isLoading && filteredCourts.length === 0" class="row g-3">
+          <div class="col-lg-4 col-md-6" *ngFor="let i of [1,2,3,4,5,6]">
+            <div class="card h-100 border-0 shadow-sm">
+              <div class="card-img-top bg-light placeholder" style="height: 180px;"></div>
+              <div class="card-body">
+                <div class="placeholder-glow">
+                  <span class="placeholder col-7 mb-2"></span>
+                  <span class="placeholder col-4 mb-2"></span>
+                  <span class="placeholder col-6"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error -->
+        <div *ngIf="error" class="alert alert-danger">
+          {{ error }}
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!isLoading && filteredCourts.length === 0" class="text-center py-5 bg-white rounded border">
+          <i antIcon type="search" theme="outline" class="fs-1 text-muted mb-3 d-block"></i>
+          <h5>Không tìm thấy kết quả nào</h5>
+          <p class="text-muted">Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+          <button class="btn btn-primary btn-sm" (click)="resetFilters()">Xóa bộ lọc</button>
+        </div>
+
+        <!-- Grid -->
+        <div class="row g-3" *ngIf="!isLoading && filteredCourts.length > 0">
+          <div class="col-lg-4 col-md-6" *ngFor="let court of filteredCourts">
+            <div class="card h-100 border-0 shadow-sm court-card">
+              <div class="position-relative">
+                <img [src]="court.images && court.images.length ? court.images[0] : 'assets/images/index.jpg'"
+                  class="card-img-top object-fit-cover" style="height: 180px;" alt="Court Image">
+              </div>
+              <div class="card-body d-flex flex-column">
+                <h6 class="card-title text-truncate mb-1" [title]="court.courtName">
+                  <a [routerLink]="['/player/court-detail', court.courtId]"
+                    [queryParams]="{ date: filterForm.get('date')?.value, startTime: filterForm.get('startTime')?.value, endTime: filterForm.get('endTime')?.value }"
+                    class="text-decoration-none text-dark stretched-link">
+                    {{ court.courtName }}
+                  </a>
+                </h6>
+                <div class="d-flex align-items-center mb-2 small text-muted">
+                  <i antIcon type="environment" theme="outline" class="me-1"></i>
+                  <span class="text-truncate">{{ court.location || court.district }}</span>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                  <div class="text-warning small me-2">
+                    <i antIcon type="star" [theme]="i < (court.rating || 0) ? 'fill' : 'outline'"
+                      *ngFor="let s of [1,2,3,4,5]; let i = index"></i>
+                  </div>
+                  <small class="text-muted">({{ court.reviewCount || 0 }})</small>
+                </div>
+
+                <div class="mb-3">
+                  <div class="d-flex flex-wrap gap-1">
+                    <span class="badge bg-light text-secondary fw-normal border"
+                      *ngFor="let am of court.amenities?.slice(0,3)">{{ am }}</span>
+                    <span class="badge bg-light text-secondary fw-normal border"
+                      *ngIf="court.amenities && court.amenities.length > 3">+{{ court.amenities.length - 3 }}</span>
+                  </div>
+                </div>
+
+                <div class="mt-auto pt-3 border-top">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted small">
+                      <span *ngIf="$any(court).slotStartTime && $any(court).slotEndTime">
+                        Giá ({{ $any(court).slotStartTime }} - {{ $any(court).slotEndTime }})
+                      </span>
+                      <span *ngIf="!$any(court).slotStartTime || !$any(court).slotEndTime">
+                        <span *ngIf="filterForm.get('startTime')?.value && filterForm.get('endTime')?.value">
+                          Giá ({{ filterForm.get('startTime')?.value }} - {{ filterForm.get('endTime')?.value }})
+                        </span>
+                        <span *ngIf="!filterForm.get('startTime')?.value || !filterForm.get('endTime')?.value">
+                          Giá thuê từ
+                        </span>
+                      </span>
+                    </div>
+                    <div class="text-primary fw-bold fs-5">
+                      {{ getSlotPrice(court) | number:'1.0-0' }}đ<small class="fs-6 text-muted fw-normal">{{
+                        getSlotDurationLabel(court) }}</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="d-flex justify-content-center mt-4" *ngIf="collectionSize > pageSize">
+        <ngb-pagination [(page)]="page" [pageSize]="pageSize" [collectionSize]="collectionSize"
+          (pageChange)="onPageChange()" [maxSize]="5" [boundaryLinks]="true">
+        </ngb-pagination>
+      </div>
+
+    </div>
+  </div>
+</div>

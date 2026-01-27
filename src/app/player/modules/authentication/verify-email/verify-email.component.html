@@ -1,0 +1,46 @@
+<div class="auth-page">
+  <div class="auth-container">
+    <div class="auth-card-wrapper">
+      <!-- Logo/Brand -->
+      <div class="auth-header text-center mb-4">
+        <a routerLink="/player/landing" class="auth-logo">
+          <h2 class="mb-0">Pickleball Court</h2>
+        </a>
+        <p class="text-muted mt-2 mb-0">Xác thực email</p>
+      </div>
+
+      <!-- Verify Email Card -->
+      <app-card [showHeader]="false" blockClass="auth-card">
+        <div class="text-center py-4">
+          <!-- Loading -->
+          <div *ngIf="isLoading">
+            <div class="spinner-border text-primary mb-3" role="status">
+              <span class="visually-hidden">Đang xử lý...</span>
+            </div>
+            <p class="text-muted mb-0">Đang xác thực email của bạn...</p>
+          </div>
+
+          <!-- Success -->
+          <div *ngIf="!isLoading && isSuccess">
+            <i antIcon type="check-circle" theme="outline" class="text-success mb-3" style="font-size: 64px;"></i>
+            <h4 class="text-success mb-3">Xác thực thành công!</h4>
+            <p class="text-muted mb-4">Email của bạn đã được xác thực thành công. Bạn sẽ được chuyển đến trang đăng nhập.</p>
+            <a routerLink="/player/login" class="btn btn-primary">Đăng nhập ngay</a>
+          </div>
+
+          <!-- Error -->
+          <div *ngIf="!isLoading && !isSuccess && errorMessage">
+            <i antIcon type="close-circle" theme="outline" class="text-danger mb-3" style="font-size: 64px;"></i>
+            <h4 class="text-danger mb-3">Xác thực thất bại</h4>
+            <p class="text-muted mb-4">{{ errorMessage }}</p>
+            <div class="d-flex gap-2 justify-content-center">
+              <a routerLink="/player/login" class="btn btn-primary">Đăng nhập</a>
+              <a routerLink="/player/register" class="btn btn-outline-secondary">Đăng ký lại</a>
+            </div>
+          </div>
+        </div>
+      </app-card>
+    </div>
+  </div>
+</div>
+

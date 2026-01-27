@@ -1,0 +1,195 @@
+<div class="player-layout">
+  <!-- Header -->
+  <header class="player-header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <a routerLink="/player/landing" class="logo-link">
+            <h2>Pickleball Court</h2>
+          </a>
+        </div>
+        <nav class="main-nav">
+          <a routerLink="/player/landing" routerLinkActive="active" class="nav-link">
+            <i antIcon type="home" theme="outline" class="nav-icon"></i>
+            <span class="nav-text">Trang chủ</span>
+          </a>
+          <a routerLink="/player/court-search" routerLinkActive="active" class="nav-link">
+            <i antIcon type="search" theme="outline" class="nav-icon"></i>
+            <span class="nav-text">Tìm sân</span>
+          </a>
+          <a routerLink="/player/my-bookings" routerLinkActive="active" class="nav-link" *ngIf="isAuthenticated$ | async">
+            <i antIcon type="calendar" theme="outline" class="nav-icon"></i>
+            <span class="nav-text">Đặt sân của tôi</span>
+          </a>
+          <a routerLink="/player/notifications" routerLinkActive="active" class="nav-link" *ngIf="isAuthenticated$ | async">
+            <i antIcon type="bell" theme="outline" class="nav-icon"></i>
+            <span class="nav-text">Thông báo</span>
+            <span class="badge" *ngIf="unreadCount() > 0">{{ unreadCount() }}</span>
+          </a>
+          <div class="nav-help" ngbDropdown *ngIf="isAuthenticated$ | async">
+            <button class="nav-link help-link" ngbDropdownToggle>
+              <i antIcon type="question-circle" theme="outline" class="nav-icon"></i>
+              <span class="nav-text">Hỗ trợ</span>
+              <i antIcon type="down" theme="outline" class="dropdown-icon-small"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end" ngbDropdownMenu>
+              <a href="#" class="dropdown-item" ngbDropdownItem>
+                <i antIcon type="question-circle" theme="outline"></i>
+                <span>Câu hỏi thường gặp</span>
+              </a>
+              <a href="#" class="dropdown-item" ngbDropdownItem>
+                <i antIcon type="book" theme="outline"></i>
+                <span>Hướng dẫn đặt sân</span>
+              </a>
+              <a href="#" class="dropdown-item" ngbDropdownItem>
+                <i antIcon type="customer-service" theme="outline"></i>
+                <span>Liên hệ hỗ trợ</span>
+              </a>
+              <div class="dropdown-divider"></div>
+              <a href="#" class="dropdown-item" ngbDropdownItem>
+                <i antIcon type="file-text" theme="outline"></i>
+                <span>Chính sách bảo mật</span>
+              </a>
+              <a href="#" class="dropdown-item" ngbDropdownItem>
+                <i antIcon type="file-protect" theme="outline"></i>
+                <span>Điều khoản sử dụng</span>
+              </a>
+            </div>
+          </div>
+        </nav>
+        <div class="user-actions">
+          <ng-container *ngIf="isAuthenticated$ | async; else guestActions">
+            <div class="user-menu" ngbDropdown>
+              <button class="user-profile-btn" ngbDropdownToggle>
+                <i antIcon type="user" theme="outline" class="user-icon"></i>
+                <span class="user-name">{{ (currentUser$ | async)?.fullName || 'Tài khoản' }}</span>
+                <i antIcon type="down" theme="outline" class="dropdown-icon"></i>
+              </button>
+              <div class="dropdown-menu dropdown-menu-end" ngbDropdownMenu>
+                <a routerLink="/player/account/profile" class="dropdown-item" ngbDropdownItem>
+                  <i antIcon type="user" theme="outline"></i>
+                  <span>Thông tin cá nhân</span>
+                </a>
+                <div class="dropdown-divider"></div>
+                <a routerLink="/player/my-bookings" class="dropdown-item" ngbDropdownItem>
+                  <i antIcon type="calendar" theme="outline"></i>
+                  <span>Lịch sử đặt sân</span>
+                </a>
+                <a routerLink="/player/notifications" class="dropdown-item" ngbDropdownItem>
+                  <i antIcon type="bell" theme="outline"></i>
+                  <span>Thông báo</span>
+                  <span class="badge ms-auto" *ngIf="unreadCount() > 0">{{ unreadCount() }}</span>
+                </a>
+                <div class="dropdown-divider"></div>
+                <button class="dropdown-item logout-item" (click)="logout()" ngbDropdownItem>
+                  <i antIcon type="logout" theme="outline"></i>
+                  <span>Đăng xuất</span>
+                </button>
+              </div>
+            </div>
+          </ng-container>
+          <ng-template #guestActions>
+            <a routerLink="/player/login" class="btn-login">
+              <i antIcon type="login" theme="outline" class="btn-icon"></i>
+              <span>Đăng nhập</span>
+            </a>
+            <a routerLink="/player/register" class="btn-register">
+              <i antIcon type="user-add" theme="outline" class="btn-icon"></i>
+              <span>Đăng ký</span>
+            </a>
+            <a routerLink="/player/forgot-password" class="btn-forgot-password">
+              <i antIcon type="key" theme="outline" class="btn-icon"></i>
+              <span class="forgot-text">Quên mật khẩu?</span>
+            </a>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="player-main">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Footer -->
+  <footer class="player-footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section footer-brand">
+          <h3 class="footer-logo">Pickleball Court</h3>
+          <p class="footer-description">
+            Hệ thống đặt sân Pickleball hàng đầu Việt Nam. 
+            Tìm kiếm và đặt sân một cách nhanh chóng, tiện lợi.
+          </p>
+          <div class="social-links">
+            <a href="#" class="social-link" aria-label="Facebook">
+              <i antIcon type="facebook" theme="outline"></i>
+            </a>
+            <a href="#" class="social-link" aria-label="Instagram">
+              <i antIcon type="instagram" theme="outline"></i>
+            </a>
+            <a href="#" class="social-link" aria-label="Twitter">
+              <i antIcon type="twitter" theme="outline"></i>
+            </a>
+            <a href="#" class="social-link" aria-label="Youtube">
+              <i antIcon type="youtube" theme="outline"></i>
+            </a>
+          </div>
+        </div>
+        <div class="footer-section">
+          <h4 class="footer-title">Liên kết nhanh</h4>
+          <ul class="footer-links">
+            <li><a routerLink="/player/landing">Trang chủ</a></li>
+            <li><a routerLink="/player/court-search">Tìm sân</a></li>
+            <li><a routerLink="/player/my-bookings">Đặt sân của tôi</a></li>
+            <li><a routerLink="/player/notifications">Thông báo</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4 class="footer-title">Hỗ trợ</h4>
+          <ul class="footer-links">
+            <li><a href="#">Câu hỏi thường gặp</a></li>
+            <li><a href="#">Hướng dẫn đặt sân</a></li>
+            <li><a href="#">Chính sách bảo mật</a></li>
+            <li><a href="#">Điều khoản sử dụng</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4 class="footer-title">Liên hệ</h4>
+          <ul class="footer-contact">
+            <li>
+              <i antIcon type="phone" theme="outline"></i>
+              <span>Hotline: 1900-xxxx</span>
+            </li>
+            <li>
+              <i antIcon type="mail" theme="outline"></i>
+              <span>Email: support@pickleball.com</span>
+            </li>
+            <li>
+              <i antIcon type="environment" theme="outline"></i>
+              <span>123 Đường ABC, Quận XYZ, TP. Hà Nội</span>
+            </li>
+            <li>
+              <i antIcon type="clock-circle" theme="outline"></i>
+              <span>Thứ 2 - Chủ nhật: 6:00 - 22:00</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="footer-bottom-content">
+          <p class="copyright">&copy; 2025 Pickleball Court. Tất cả quyền được bảo lưu.</p>
+          <div class="footer-payment">
+            <span class="payment-label">Chấp nhận thanh toán:</span>
+            <div class="payment-icons">
+              <i antIcon type="credit-card" theme="outline" class="payment-icon"></i>
+              <i antIcon type="wallet" theme="outline" class="payment-icon"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+

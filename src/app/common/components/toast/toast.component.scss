@@ -1,0 +1,158 @@
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 400px;
+  width: 100%;
+  pointer-events: none;
+
+  @media (max-width: 576px) {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+}
+
+.toast-item {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  pointer-events: auto;
+  animation: slideInRight 0.3s ease-out;
+  border-left: 4px solid;
+
+  &.toast-success {
+    border-left-color: #52c41a;
+    background: #f6ffed;
+    border-left-color: #52c41a;
+
+    .toast-icon {
+      color: #52c41a;
+    }
+  }
+
+  &.toast-error {
+    border-left-color: #ff4d4f;
+    background: #fff2f0;
+    border-left-color: #ff4d4f;
+
+    .toast-icon {
+      color: #ff4d4f;
+    }
+  }
+
+  &.toast-warning {
+    border-left-color: #faad14;
+    background: #fffbe6;
+    border-left-color: #faad14;
+
+    .toast-icon {
+      color: #faad14;
+    }
+  }
+
+  &.toast-info {
+    border-left-color: #1890ff;
+    background: #e6f7ff;
+    border-left-color: #1890ff;
+
+    .toast-icon {
+      color: #1890ff;
+    }
+  }
+}
+
+.toast-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.toast-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.toast-message {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast-title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: #262626;
+}
+
+.toast-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #595959;
+  word-wrap: break-word;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #8c8c8c;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  margin-top: -4px;
+  margin-right: -4px;
+
+  &:hover {
+    color: #262626;
+  }
+
+  i {
+    font-size: 16px;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+// Animation for removal
+.toast-item.removing {
+  animation: slideOutRight 0.3s ease-in forwards;
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+
+

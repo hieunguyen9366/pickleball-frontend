@@ -1,0 +1,67 @@
+<div class="customer-list-page">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <app-card cardTitle="Danh sách Khách hàng" [padding]="0">
+          <!-- Loading State -->
+          <div *ngIf="isLoading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Đang tải...</span>
+            </div>
+            <p class="text-muted mt-3 mb-0">Đang tải danh sách khách hàng...</p>
+          </div>
+
+          <!-- Content -->
+          <div *ngIf="!isLoading" class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Họ tên</th>
+                  <th>Email</th>
+                  <th>Số điện thoại</th>
+                  <th>Ngày tạo</th>
+                  <th class="text-end">Hành động</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let customer of customers">
+                  <td>#{{ customer.userId }}</td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <img src="assets/images/user/avatar-1.jpg" alt="user-image" class="user-avatar wid-35 rounded-circle" />
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0">{{ customer.fullName }}</h6>
+                        </div>
+                    </div>
+                  </td>
+                  <td>{{ customer.email }}</td>
+                  <td>{{ customer.phoneNumber }}</td>
+                  <td>{{ customer.createdAt | date:'dd/MM/yyyy' }}</td>
+                  <td class="text-end">
+                    <button class="btn btn-link-primary btn-sm me-1" 
+                            title="Xem lịch sử đặt sân"
+                            (click)="viewBookingHistory(customer)">
+                      <i antIcon type="eye" theme="outline"></i>
+                    </button>
+                    <button class="btn btn-link-danger btn-sm" 
+                            [title]="customer.status === 'LOCKED' ? 'Mở khóa tài khoản' : 'Khóa tài khoản'"
+                            (click)="blockUser(customer)">
+                      <i antIcon [type]="customer.status === 'LOCKED' ? 'unlock' : 'stop'" theme="outline"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="customers.length === 0">
+                    <td colspan="6" class="text-center py-3">Chưa có khách hàng nào.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </app-card>
+      </div>
+    </div>
+  </div>
+</div>
+

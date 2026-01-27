@@ -1,0 +1,40 @@
+// Using global CSS custom properties instead of SCSS variables
+// These are provided by the global styles.scss
+
+.payment-page {
+  padding: 2rem 0;
+  min-height: calc(100vh - 200px);
+  background-color: var(--bs-body-bg);
+
+  .container {
+    max-width: 1200px;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--pc-heading-color);
+      margin-bottom: 0;
+    }
+  }
+}
+
+.summary-card {
+  .h4 {
+    font-weight: 700;
+  }
+}
+
+.payment-card {
+  .list-group-item {
+    cursor: pointer;
+  }
+}
+
+.payment-container {
+  padding: 2rem;
+}
+

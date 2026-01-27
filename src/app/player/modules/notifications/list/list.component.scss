@@ -1,0 +1,71 @@
+// Using global CSS custom properties instead of SCSS variables
+// These are provided by the global styles.scss
+
+.notifications-page {
+  padding: 2rem 0;
+  min-height: calc(100vh - 200px);
+  background-color: var(--bs-body-bg);
+
+  .container {
+    max-width: 1200px;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--pc-heading-color);
+      margin-bottom: 0;
+      display: flex;
+      align-items: center;
+
+      i {
+        font-size: 1.5rem;
+        color: var(--bs-primary);
+        margin-right: 0.5rem;
+      }
+    }
+  }
+}
+
+// List group item hover effect
+.list-group-item-action {
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: var(--bs-gray-50);
+    transform: translateX(2px);
+  }
+
+  &.bg-light {
+    background-color: rgba(var(--bs-primary-rgb), 0.05) !important;
+  }
+}
+
+// Badge circle for unread indicator
+.badge-circle {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+// Border utilities
+.border-start-4 {
+  border-left-width: 4px !important;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .notifications-page {
+    padding: 1rem 0;
+
+    .page-header {
+      .page-title {
+        font-size: 1.5rem;
+      }
+    }
+  }
+}

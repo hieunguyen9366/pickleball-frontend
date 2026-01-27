@@ -1,0 +1,44 @@
+<div class="modal-header">
+  <h4 class="modal-title">Chỉnh sửa đặt sân</h4>
+  <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
+</div>
+<div class="modal-body">
+  <form>
+    <div *ngIf="error" class="alert alert-danger mb-3">{{ error }}</div>
+    <div class="mb-3">
+      <label class="form-label">Ngày đặt</label>
+      <input type="date" class="form-control" [(ngModel)]="formData.bookingDate" name="bookingDate" [disabled]="true">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Giờ bắt đầu</label>
+      <input type="time" class="form-control" [(ngModel)]="formData.startTime" name="startTime" [disabled]="true">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Giờ kết thúc</label>
+      <input type="time" class="form-control" [(ngModel)]="formData.endTime" name="endTime" [disabled]="true">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Trạng thái</label>
+      <select class="form-select" [(ngModel)]="formData.status" name="status">
+        <option [value]="BookingStatus.PENDING">Chờ xử lý</option>
+        <option [value]="BookingStatus.CONFIRMED">Đã xác nhận</option>
+        <option [value]="BookingStatus.PAID">Đã thanh toán</option>
+        <option [value]="BookingStatus.COMPLETED">Hoàn thành</option>
+        <option [value]="BookingStatus.CANCELLED">Đã hủy</option>
+      </select>
+    </div>
+    <div class="alert alert-info">
+      <small>Lưu ý: Chỉ có thể thay đổi trạng thái. Để thay đổi thông tin khác, vui lòng hủy và tạo đặt sân mới.</small>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="isLoading">Hủy</button>
+  <button type="button" class="btn btn-primary" (click)="save()" [disabled]="isLoading">
+    <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+    {{ isLoading ? 'Đang lưu...' : 'Lưu' }}
+  </button>
+</div>
+
+
+

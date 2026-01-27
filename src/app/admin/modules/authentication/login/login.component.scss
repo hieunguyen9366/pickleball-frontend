@@ -1,0 +1,61 @@
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem 0;
+}
+
+.auth-card {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .input-icon {
+    position: absolute;
+    left: 12px;
+    color: #8e8e93;
+    z-index: 1;
+  }
+
+  .form-control {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
+  .password-toggle {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    color: #8e8e93;
+    cursor: pointer;
+    padding: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      color: #667eea;
+    }
+  }
+}
+
+
+

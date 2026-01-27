@@ -1,0 +1,33 @@
+<div class="toast-container" *ngIf="toasts.length > 0">
+  <div
+    *ngFor="let toast of toasts"
+    class="toast-item"
+    [ngClass]="getToastClass(toast.type)"
+    [@slideInOut]
+  >
+    <div class="toast-content">
+      <div class="toast-icon">
+        <i
+          antIcon
+          [type]="getToastIcon(toast.type)"
+          [theme]="getToastIconTheme(toast.type)"
+        ></i>
+      </div>
+      <div class="toast-message">
+        <div class="toast-title" *ngIf="toast.title">{{ toast.title }}</div>
+        <div class="toast-text">{{ toast.message }}</div>
+      </div>
+      <button
+        class="toast-close"
+        (click)="removeToast(toast.id)"
+        type="button"
+        aria-label="Đóng"
+      >
+        <i antIcon type="close" theme="outline"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+
+

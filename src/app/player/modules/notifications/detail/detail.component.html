@@ -1,0 +1,105 @@
+<div class="notification-detail-page">
+  <div class="container">
+    <!-- Page Header -->
+    <div class="row">
+      <div class="col-12">
+        <div class="page-header mb-4">
+          <button class="btn btn-link p-0 mb-2" (click)="goBack()">
+            <i antIcon type="arrow-left" theme="outline" class="me-2"></i>
+          </button>
+          <h2 class="page-title">
+            Chi tiết thông báo
+          </h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification Detail -->
+    <div class="row">
+      <div class="col-lg-8 col-md-12 mx-auto">
+        <!-- Loading State -->
+        <div class="text-center py-5" *ngIf="isLoading">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+          </div>
+          <p class="text-muted mt-3">Đang tải thông báo...</p>
+        </div>
+
+        <!-- Error State -->
+        <div class="alert alert-danger" role="alert" *ngIf="error && !isLoading">
+          <i antIcon type="exclamation-circle" theme="outline" class="me-2"></i>
+          {{ error }}
+        </div>
+
+        <!-- Notification Detail Card -->
+        <app-card [showHeader]="false" blockClass="notification-detail-card" *ngIf="!isLoading && !error && notification">
+          <div class="notification-header-section">
+            <div class="notification-icon-wrapper">
+              <div class="notification-icon" [ngClass]="'icon-' + getNotificationIconColor(notification.type)">
+                <i antIcon [type]="getNotificationIcon(notification.type)" theme="outline"></i>
+              </div>
+              <span class="unread-indicator" *ngIf="!notification.isRead"></span>
+            </div>
+            <div class="notification-header-content">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h3 class="notification-title mb-0">{{ notification.title }}</h3>
+                <span class="notification-type-badge" [ngClass]="'badge-' + getNotificationIconColor(notification.type)">
+                  {{ getNotificationTypeLabel(notification.type) }}
+                </span>
+              </div>
+              <div class="notification-meta">
+                <span class="meta-item">
+                  <i antIcon type="clock-circle" theme="outline" class="me-1"></i>
+                  {{ getFormattedDate(notification.createdAt) }}
+                </span>
+                <span class="meta-item" *ngIf="notification.isRead && notification.readAt">
+                  <i antIcon type="check-circle" theme="outline" class="me-1"></i>
+                  Đã đọc: {{ getFormattedDate(notification.readAt) }}
+                </span>
+                <span class="meta-item badge bg-warning" *ngIf="!notification.isRead">
+                  <i antIcon type="bell" theme="outline" class="me-1"></i>
+                  Chưa đọc
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="notification-body-section">
+            <div class="notification-message">
+              <p>{{ notification.message }}</p>
+            </div>
+
+            <!-- Related Info -->
+            <div class="notification-related-info" *ngIf="notification.relatedId || notification.relatedType">
+              <div class="info-item">
+                <strong>Loại liên quan:</strong> {{ notification.relatedType || 'N/A' }}
+              </div>
+              <div class="info-item" *ngIf="notification.relatedId">
+                <strong>ID liên quan:</strong> {{ notification.relatedId }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="notification-actions-section">
+            <div class="d-flex gap-2 justify-content-end">
+              <button 
+                class="btn btn-primary" 
+                (click)="markAsRead()"
+                *ngIf="!notification.isRead">
+                <i antIcon type="check-circle" theme="outline" class="me-2"></i>
+                Đánh dấu đã đọc
+              </button>
+              <button 
+                class="btn btn-danger" 
+                (click)="deleteNotification()">
+                <i antIcon type="delete" theme="outline" class="me-2"></i>
+                Xóa thông báo
+              </button>
+            </div>
+          </div>
+        </app-card>
+      </div>
+    </div>
+  </div>
+</div>

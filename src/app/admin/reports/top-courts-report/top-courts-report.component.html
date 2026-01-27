@@ -1,0 +1,113 @@
+<div class="top-courts-report-page">
+  <div class="container-fluid">
+    <div class="row" *ngIf="isLoading && !report">
+      <div class="col-12">
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+          </div>
+          <p class="text-muted mt-3 mb-0">Đang tải báo cáo top cụm sân...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" *ngIf="error && !isLoading">
+      <div class="col-12">
+        <div class="alert alert-danger">{{ error }}</div>
+      </div>
+    </div>
+
+    <div class="row" *ngIf="!isLoading && report">
+      <div class="col-12">
+        <app-card cardTitle="Top Cụm sân Doanh thu" [padding]="0">
+          <div class="p-3">
+            <div class="row g-3 mb-4">
+              <div class="col-md-3">
+                <label class="form-label">Kỳ báo cáo</label>
+                <select class="form-select" [(ngModel)]="period" (change)="onFilterChange()">
+                  <option value="day">Theo ngày</option>
+                  <option value="month">Theo tháng</option>
+                  <option value="year">Theo năm</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Từ ngày</label>
+                <input type="date" class="form-control" [(ngModel)]="startDate" (change)="onFilterChange()">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Đến ngày</label>
+                <input type="date" class="form-control" [(ngModel)]="endDate" (change)="onFilterChange()">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <h5 class="mb-3">Top Cụm sân</h5>
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>Hạng</th>
+                        <th>Cụm sân</th>
+                        <th>Số lượt đặt</th>
+                        <th class="text-end">Doanh thu</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let item of report.topCourtGroups; let i = index">
+                        <td>
+                          <span class="badge" [class.bg-warning]="i === 0" [class.bg-secondary]="i === 1" [class.bg-info]="i === 2" [class.bg-light]="i > 2">
+                            #{{ i + 1 }}
+                          </span>
+                        </td>
+                        <td>{{ item.courtGroupName }}</td>
+                        <td>{{ item.bookingCount }}</td>
+                        <td class="text-end">{{ item.revenue | number:'1.0-0' }} ₫</td>
+                      </tr>
+                      <tr *ngIf="report.topCourtGroups.length === 0">
+                        <td colspan="4" class="text-center py-3">Chưa có dữ liệu.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <h5 class="mb-3">Top Sân</h5>
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>Hạng</th>
+                        <th>Sân</th>
+                        <th>Số lượt đặt</th>
+                        <th class="text-end">Doanh thu</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let item of report.topCourts; let i = index">
+                        <td>
+                          <span class="badge" [class.bg-warning]="i === 0" [class.bg-secondary]="i === 1" [class.bg-info]="i === 2" [class.bg-light]="i > 2">
+                            #{{ i + 1 }}
+                          </span>
+                        </td>
+                        <td>{{ item.courtName }}</td>
+                        <td>{{ item.bookingCount }}</td>
+                        <td class="text-end">{{ item.revenue | number:'1.0-0' }} ₫</td>
+                      </tr>
+                      <tr *ngIf="report.topCourts.length === 0">
+                        <td colspan="4" class="text-center py-3">Chưa có dữ liệu.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </app-card>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+

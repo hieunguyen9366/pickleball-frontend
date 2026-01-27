@@ -1,0 +1,176 @@
+<div class="court-detail-page">
+  <div class="container">
+    <!-- Loading -->
+    <div class="row" *ngIf="isLoading">
+      <div class="col-12">
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+          </div>
+          <p class="text-muted mt-3 mb-0">Đang tải thông tin sân...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div class="row" *ngIf="!isLoading && error">
+      <div class="col-12">
+        <div class="alert alert-danger text-center">
+          {{ error }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Court Detail -->
+    <div class="row" *ngIf="!isLoading && !error && court">
+      <!-- Left Column: Info & Content -->
+      <div class="col-lg-8 col-md-12 mb-3">
+        <!-- Image Carousel -->
+        <div class="card mb-3 overflow-hidden border-0 shadow-sm" *ngIf="court.images && court.images.length">
+          <ngb-carousel [showNavigationArrows]="true" [showNavigationIndicators]="true">
+            <ng-template ngbSlide *ngFor="let img of court.images">
+              <div class="ratio ratio-21x9">
+                <img [src]="img" alt="Sân Pickleball" class="object-fit-cover w-100 h-100">
+              </div>
+            </ng-template>
+          </ngb-carousel>
+        </div>
+
+        <app-card [showHeader]="false" blockClass="court-main-card">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <h2 class="mb-2">{{ court.courtName }}</h2>
+              <p class="mb-1 text-muted d-flex align-items-center">
+                <i antIcon type="environment" theme="outline" class="me-2"></i>
+                {{ court.location }}
+                <a href="https://www.google.com/maps/search/?api=1&query={{court.location}}" target="_blank"
+                  class="ms-2 text-primary text-decoration-none small">
+                  <small>(Xem bản đồ)</small>
+                </a>
+              </p>
+              <p class="mb-2 text-muted small ps-4" *ngIf="court.district || court.city">
+                {{ court.district }}{{ court.district && court.city ? ', ' : '' }}{{ court.city }}
+              </p>
+            </div>
+
+          </div>
+
+          <div class="mb-4">
+            <h5 class="mb-3 border-bottom pb-2">Giới thiệu</h5>
+            <p class="text-secondary" *ngIf="court.description">{{ court.description }}</p>
+          </div>
+
+          <div class="amenities mb-4" *ngIf="court.amenities?.length">
+            <h5 class="mb-3 border-bottom pb-2">Tiện ích</h5>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="badge bg-light text-dark border px-3 py-2 fw-normal" *ngFor="let amenity of court.amenities">
+                {{ amenity }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Reviews Section -->
+          <div class="reviews-section mt-5" *ngIf="reviews.length > 0">
+            <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+              <h5 class="mb-0">Đánh giá từ người chơi</h5>
+              <div class="d-flex align-items-center">
+                <span class="fs-4 fw-bold me-2">{{ court.rating }}</span>
+                <div class="text-warning me-2">
+                  <ng-container *ngFor="let star of ratingStars">
+                    <i antIcon type="star" [theme]="star <= (court.rating || 0) ? 'fill' : 'outline'"></i>
+                  </ng-container>
+                </div>
+                <span class="text-muted">({{ court.reviewCount }} đánh giá)</span>
+              </div>
+            </div>
+
+            <div class="review-list">
+              <div class="review-item mb-4 pb-3 border-bottom" *ngFor="let review of reviews">
+                <div class="d-flex justify-content-between mb-2">
+                  <div class="d-flex align-items-center">
+                    <div
+                      class="avatar-placeholder bg-secondary-subtle rounded-circle d-flex align-items-center justify-content-center me-2"
+                      style="width: 40px; height: 40px;">
+                      <span class="fw-bold text-secondary">{{ review.user.charAt(0) }}</span>
+                    </div>
+                    <div>
+                      <div class="fw-bold">{{ review.user }}</div>
+                      <small class="text-muted">{{ review.date }}</small>
+                    </div>
+                  </div>
+                  <div class="text-warning">
+                    <i antIcon type="star" theme="fill" class="me-1"></i>
+                    <span class="fw-bold">{{ review.rating }}</span>
+                  </div>
+                </div>
+                <p class="mb-0 text-secondary">{{ review.comment }}</p>
+              </div>
+            </div>
+          </div>
+
+        </app-card>
+      </div>
+
+      <!-- Right Column: Booking & Contact (Sticky) -->
+      <div class="col-lg-4 col-md-12 mb-3">
+        <div class="sticky-top" style="top: 20px; z-index: 1;">
+          <app-card [showHeader]="false" blockClass="booking-card shadow-sm border-primary border-opacity-25">
+            <div class="d-flex justify-content-between align-items-center mb-0">
+              <span class="text-muted">Giá thuê</span>
+              <div class="text-end">
+                <span class="h4 text-primary fw-bold mb-0">
+                  {{ getTotalPrice() | number:'1.0-0' }}đ
+                  <small class="fs-6 text-muted fw-normal">{{ getDurationLabel() }}</small>
+                </span>
+              </div>
+            </div>
+            <!-- Dynamic Price Hint -->
+            <div *ngIf="route.snapshot.queryParamMap.get('startTime')" class="text-end mb-3">
+              <small class="text-info" style="font-size: 0.8rem;">
+                (Khung giờ {{ route.snapshot.queryParamMap.get('startTime') }} - {{
+                route.snapshot.queryParamMap.get('endTime') }})
+              </small>
+            </div>
+            <div *ngIf="!route.snapshot.queryParamMap.get('startTime')" class="text-end mb-3">
+              <small class="text-muted" style="font-size: 0.8rem;">Giá thuê cho 1 giờ</small>
+            </div>
+
+            <hr class="my-3">
+
+            <button class="btn btn-primary w-100 btn-lg mb-3 shadow-sm" (click)="goToBooking()">
+              Đặt sân ngay
+            </button>
+            <p class="text-center text-muted small mb-0">
+              <i antIcon type="check-circle" theme="outline" class="text-success me-1"></i>
+              Xác nhận tức thì
+            </p>
+          </app-card>
+
+          <app-card [showHeader]="false" blockClass="contact-card mt-3">
+            <h6 class="mb-3 text-uppercase text-muted small fw-bold">Thông tin liên hệ</h6>
+
+            <div class="d-flex align-items-center mb-3" *ngIf="court.phone">
+              <div class="icon-box bg-light text-primary rounded-circle p-2 me-3">
+                <i antIcon type="phone" theme="outline" class="fs-5"></i>
+              </div>
+              <div>
+                <small class="text-muted d-block">Hotline</small>
+                <a href="tel:{{court.phone}}" class="fw-bold text-dark text-decoration-none">{{ court.phone }}</a>
+              </div>
+            </div>
+
+            <div class="d-flex align-items-center">
+              <div class="icon-box bg-light text-primary rounded-circle p-2 me-3">
+                <i antIcon type="clock-circle" theme="outline" class="fs-5"></i>
+              </div>
+              <div>
+                <small class="text-muted d-block">Giờ mở cửa</small>
+                <span class="fw-semibold">05:00 - 23:00</span>
+              </div>
+            </div>
+          </app-card>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

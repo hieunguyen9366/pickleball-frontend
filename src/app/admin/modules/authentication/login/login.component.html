@@ -1,0 +1,66 @@
+<div class="auth-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-5 col-lg-4">
+        <div class="auth-card">
+          <app-card cardTitle="Đăng nhập Quản trị" [padding]="0">
+            <div class="p-4">
+              <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+                <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+                  {{ errorMessage }}
+                </div>
+
+                <div class="mb-3">
+                  <label for="email" class="form-label">Email</label>
+                  <div class="input-wrapper">
+                    <i antIcon type="mail" theme="outline" class="input-icon"></i>
+                    <input type="email" id="email" class="form-control" formControlName="email" placeholder="Nhập email"
+                      [class.is-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" />
+                  </div>
+                  <div *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+                    class="invalid-feedback d-block">
+                    <span *ngIf="loginForm.get('email')?.errors?.['required']">Email là bắt buộc</span>
+                    <span *ngIf="loginForm.get('email')?.errors?.['email']">Email không hợp lệ</span>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="password" class="form-label">Mật khẩu</label>
+                  <div class="input-wrapper">
+                    <i antIcon type="lock" theme="outline" class="input-icon"></i>
+                    <input [type]="showPassword ? 'text' : 'password'" id="password" class="form-control"
+                      formControlName="password" placeholder="Nhập mật khẩu"
+                      [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" />
+                    <button type="button" class="password-toggle" (click)="togglePasswordVisibility()">
+                      <i *ngIf="!showPassword" antIcon type="eye" theme="outline"></i>
+                      <i *ngIf="showPassword" antIcon type="eye-invisible" theme="outline"></i>
+                    </button>
+                  </div>
+                  <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+                    class="invalid-feedback d-block">
+                    <span *ngIf="loginForm.get('password')?.errors?.['required']">Mật khẩu là bắt buộc</span>
+                    <span *ngIf="loginForm.get('password')?.errors?.['minlength']">Mật khẩu phải có ít nhất 6 ký
+                      tự</span>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <button type="submit" class="btn btn-primary w-100" [disabled]="isLoading || loginForm.invalid">
+                    <span *ngIf="!isLoading">
+                      <i antIcon type="login" theme="outline" class="me-2"></i>
+                      Đăng nhập
+                    </span>
+                    <span *ngIf="isLoading">
+                      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Đang đăng nhập...
+                    </span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </app-card>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

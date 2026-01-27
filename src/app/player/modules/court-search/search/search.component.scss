@@ -1,0 +1,45 @@
+.search-page-container {
+  min-height: calc(100vh - 100px);
+  background-color: #f8f9fa;
+}
+
+.filter-card-body {
+  padding: 1.25rem;
+}
+
+.court-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .1) !important;
+  }
+
+  .card-img-top {
+    transition: opacity 0.3s;
+  }
+}
+
+.form-check-input:checked {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+// Media query for sticky sidebar on desktop only
+@media (min-width: 992px) {
+  .col-lg-3 {
+    position: sticky;
+    top: 2rem;
+    align-self: flex-start;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+
+    // Hide scrollbar for cleaner look
+    &::-webkit-scrollbar {
+      width: 0px;
+      background: transparent;
+    }
+  }
+}
+
+

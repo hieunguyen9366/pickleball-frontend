@@ -1,0 +1,60 @@
+<div class="modal-header">
+    <h4 class="modal-title">{{ service ? 'Chỉnh sửa Dịch vụ' : 'Thêm Dịch vụ mới' }}</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+</div>
+<div class="modal-body">
+    <form [formGroup]="form" (ngSubmit)="save()">
+        <div *ngIf="error" class="alert alert-danger mb-3">{{ error }}</div>
+        <div class="mb-3">
+            <label class="form-label">Tên dịch vụ <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" formControlName="serviceName" placeholder="Ví dụ: Thuê vợt"
+                   [class.is-invalid]="form.get('serviceName')?.invalid && form.get('serviceName')?.touched">
+            <div *ngIf="form.get('serviceName')?.invalid && form.get('serviceName')?.touched" class="invalid-feedback">
+                Tên dịch vụ là bắt buộc
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Mô tả</label>
+            <textarea class="form-control" formControlName="description" rows="3"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Cụm sân <span class="text-danger">*</span></label>
+            <select class="form-select" formControlName="courtGroupId" [class.is-invalid]="form.get('courtGroupId')?.invalid && form.get('courtGroupId')?.touched">
+                <option [value]="null">-- Chọn cụm sân --</option>
+                <option *ngFor="let group of courtGroups" [value]="group.courtGroupId">
+                    {{ group.courtGroupName }}
+                </option>
+            </select>
+            <div *ngIf="form.get('courtGroupId')?.invalid && form.get('courtGroupId')?.touched" class="invalid-feedback">
+                Vui lòng chọn cụm sân
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Giá (VND)</label>
+                <input type="number" class="form-control" formControlName="price">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Đơn vị tính</label>
+                <input type="text" class="form-control" formControlName="unit" placeholder="Ví dụ: cái, chai, giờ">
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Trạng thái</label>
+            <select class="form-select" formControlName="status">
+                <option *ngFor="let s of serviceStatuses" [value]="s">{{ s }}</option>
+            </select>
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="close()" [disabled]="isLoading">Hủy</button>
+    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="form.invalid || isLoading">
+        <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+        {{ isLoading ? 'Đang lưu...' : 'Lưu thay đổi' }}
+    </button>
+</div>

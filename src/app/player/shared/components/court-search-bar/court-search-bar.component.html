@@ -1,0 +1,46 @@
+<div class="card shadow-lg border-0 search-bar-card">
+  <div class="card-body p-4">
+    <form [formGroup]="searchForm" (ngSubmit)="onSubmit()" class="search-form">
+      <div class="row align-items-end g-3">
+        <div class="col-md-3">
+          <label class="form-label f-w-600 mb-2">Quận/Huyện</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            formControlName="district"
+            placeholder="Nhập quận/huyện">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label f-w-600 mb-2">Ngày</label>
+          <input 
+            type="date" 
+            class="form-control" 
+            formControlName="date"
+            [min]="todayDate">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label f-w-600 mb-2">Giờ bắt đầu</label>
+          <input 
+            type="time" 
+            class="form-control" 
+            formControlName="startTime">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label f-w-600 mb-2">Giờ kết thúc</label>
+          <input 
+            type="time" 
+            class="form-control" 
+            formControlName="endTime">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label f-w-600 mb-2 d-block">&nbsp;</label>
+          <button type="submit" class="btn btn-primary w-100 shadow">
+            <i antIcon type="search" theme="outline" class="me-2"></i>
+            Tìm kiếm
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+

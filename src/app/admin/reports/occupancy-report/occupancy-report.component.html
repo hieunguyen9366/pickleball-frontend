@@ -1,0 +1,91 @@
+<div class="occupancy-report-page">
+  <div class="container-fluid">
+    <div class="row" *ngIf="isLoading && !report">
+      <div class="col-12">
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+          </div>
+          <p class="text-muted mt-3 mb-0">Đang tải báo cáo tỷ lệ lấp đầy...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" *ngIf="error && !isLoading">
+      <div class="col-12">
+        <div class="alert alert-danger">{{ error }}</div>
+      </div>
+    </div>
+
+    <div class="row" *ngIf="!isLoading && report">
+      <div class="col-12">
+        <app-card cardTitle="Báo cáo Tỷ lệ lấp đầy" [padding]="0">
+          <div class="p-3">
+            <div class="row g-3 mb-4">
+              <div class="col-md-2">
+                <label class="form-label">Kỳ báo cáo</label>
+                <select class="form-select" [(ngModel)]="period" (change)="onFilterChange()">
+                  <option value="day">Theo ngày</option>
+                  <option value="month">Theo tháng</option>
+                  <option value="year">Theo năm</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Từ ngày</label>
+                <input type="date" class="form-control" [(ngModel)]="startDate" (change)="onFilterChange()">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Đến ngày</label>
+                <input type="date" class="form-control" [(ngModel)]="endDate" (change)="onFilterChange()">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Cụm sân</label>
+                <select class="form-select" [(ngModel)]="selectedCourtGroupId" (change)="onFilterChange()">
+                  <option [value]="undefined">Tất cả cụm sân</option>
+                  <option *ngFor="let group of courtGroups" [value]="group.courtGroupId">
+                    {{ group.courtGroupName }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-4">
+                <div class="card bg-info text-white">
+                  <div class="card-body">
+                    <h6 class="text-white-50 mb-1">Tổng số slot</h6>
+                    <h3 class="mb-0">{{ report.totalSlots }}</h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card bg-success text-white">
+                  <div class="card-body">
+                    <h6 class="text-white-50 mb-1">Slot đã đặt</h6>
+                    <h3 class="mb-0">{{ report.bookedSlots }}</h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card bg-primary text-white">
+                  <div class="card-body">
+                    <h6 class="text-white-50 mb-1">Tỷ lệ lấp đầy</h6>
+                    <h3 class="mb-0">{{ report.occupancyRate | number:'1.1-1' }}%</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="alert alert-info">
+              <i antIcon type="pie-chart" theme="outline" class="me-2"></i>
+              Chức năng này đang được phát triển. Dữ liệu sẽ được tính toán dựa trên số lượng booking và time slots.
+            </div>
+          </div>
+        </app-card>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+

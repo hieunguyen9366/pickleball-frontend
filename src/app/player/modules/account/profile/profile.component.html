@@ -1,0 +1,284 @@
+<div class="profile-page">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <div class="page-header mb-4">
+          <h2 class="page-title">
+            <i antIcon type="user" theme="outline" class="me-2"></i>
+            Thông tin cá nhân
+          </h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Profile Card -->
+      <div class="col-lg-4 col-md-12 mb-4">
+      
+
+        <!-- Account Info Card -->
+        <app-card cardTitle="Thông tin tài khoản" [showHeader]="true" blockClass="account-info-card">
+          <div class="info-item mb-3">
+            <div class="info-label">
+              <i antIcon type="calendar" theme="outline" class="me-2"></i>
+              Ngày tham gia
+            </div>
+            <div class="info-value">
+              {{ getFormattedDate(currentUser?.createdAt) }}
+            </div>
+          </div>
+          <div class="info-item mb-3">
+            <div class="info-label">
+              <i antIcon type="check-circle" theme="outline" class="me-2"></i>
+              Trạng thái
+            </div>
+            <div class="info-value">
+              <span class="badge bg-success">Đã xác thực</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">
+              <i antIcon type="user" theme="outline" class="me-2"></i>
+              Vai trò
+            </div>
+            <div class="info-value">
+              <span class="badge bg-primary">Người chơi</span>
+            </div>
+          </div>
+        </app-card>
+      </div>
+
+      <!-- Profile Form -->
+      <div class="col-lg-8 col-md-12">
+        <app-card [showHeader]="false" blockClass="profile-form-card">
+          <!-- Tabs Navigation -->
+          <ul ngbNav #nav="ngbNav" class="nav-tabs profile-tabs" [(activeId)]="activeTab">
+            <li [ngbNavItem]="1">
+              <a ngbNavLink>
+                <i antIcon type="user" theme="outline" class="me-2"></i>
+                Thông tin cá nhân
+              </a>
+              <ng-template ngbNavContent>
+                <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+            <!-- Success Message -->
+            <div class="alert alert-success" role="alert" *ngIf="successMessage">
+              <i antIcon type="check-circle" theme="outline" class="me-2"></i>
+              {{ successMessage }}
+            </div>
+
+            <!-- Error Message -->
+            <div class="alert alert-danger" role="alert" *ngIf="errorMessage">
+              {{ errorMessage }}
+            </div>
+
+            <!-- Full Name -->
+            <div class="form-group mb-3">
+              <label class="form-label f-w-600 d-flex align-items-center" for="fullName">
+                <i antIcon type="user" theme="outline" class="me-2"></i>
+                Họ và tên <span class="text-danger">*</span>
+              </label>
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  id="fullName"
+                  formControlName="fullName"
+                  class="form-control"
+                  [class.is-invalid]="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched"
+                  placeholder="Nhập họ và tên"
+                  [readonly]="!isEditing"
+                />
+              </div>
+              <div class="invalid-feedback d-block" *ngIf="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched">
+                <div *ngIf="profileForm.get('fullName')?.errors?.['required']">Họ và tên là bắt buộc</div>
+                <div *ngIf="profileForm.get('fullName')?.errors?.['minlength']">Họ và tên phải có ít nhất 2 ký tự</div>
+              </div>
+            </div>
+
+            <!-- Email (Read-only) -->
+            <div class="form-group mb-3">
+              <label class="form-label f-w-600 d-flex align-items-center" for="email">
+                <i antIcon type="mail" theme="outline" class="me-2"></i>
+                Email
+              </label>
+              <div class="input-wrapper">
+                <input
+                  type="email"
+                  id="email"
+                  formControlName="email"
+                  class="form-control"
+                  readonly
+                  placeholder="Email"
+                />
+              </div>
+              <small class="form-text text-muted">Email không thể thay đổi</small>
+            </div>
+
+            <!-- Phone Number -->
+            <div class="form-group mb-3">
+              <label class="form-label f-w-600 d-flex align-items-center" for="phoneNumber">
+                <i antIcon type="phone" theme="outline" class="me-2"></i>
+                Số điện thoại <span class="text-danger">*</span>
+              </label>
+              <div class="input-wrapper">
+                <input
+                  type="tel"
+                  id="phoneNumber"
+                  formControlName="phoneNumber"
+                  class="form-control"
+                  [class.is-invalid]="profileForm.get('phoneNumber')?.invalid && profileForm.get('phoneNumber')?.touched"
+                  placeholder="Nhập số điện thoại"
+                  [readonly]="!isEditing"
+                />
+              </div>
+              <div class="invalid-feedback d-block" *ngIf="profileForm.get('phoneNumber')?.invalid && profileForm.get('phoneNumber')?.touched">
+                <div *ngIf="profileForm.get('phoneNumber')?.errors?.['required']">Số điện thoại là bắt buộc</div>
+                <div *ngIf="profileForm.get('phoneNumber')?.errors?.['pattern']">Số điện thoại không hợp lệ (10-11 số)</div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="form-actions d-flex justify-content-end gap-2">
+              <button type="button" class="btn btn-primary" (click)="toggleEdit()" *ngIf="!isEditing">
+                <i antIcon type="edit" theme="outline" class="me-2"></i>
+                Chỉnh sửa
+              </button>
+              <ng-container *ngIf="isEditing">
+                <button type="submit" class="btn btn-primary" [disabled]="profileForm.invalid || isLoading">
+                  <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <i antIcon type="save" theme="outline" class="me-2" *ngIf="!isLoading"></i>
+                  <span *ngIf="!isLoading">Lưu thay đổi</span>
+                  <span *ngIf="isLoading">Đang lưu...</span>
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="toggleEdit()" [disabled]="isLoading">
+                  Hủy
+                </button>
+              </ng-container>
+                </div>
+                </form>
+              </ng-template>
+            </li>
+            <li [ngbNavItem]="2">
+              <a ngbNavLink>
+                <i antIcon type="lock" theme="outline" class="me-2"></i>
+                Đổi mật khẩu
+              </a>
+              <ng-template ngbNavContent>
+                <form [formGroup]="changePasswordForm" (ngSubmit)="onSubmitChangePassword()">
+                  <!-- Success Message -->
+                  <div class="alert alert-success" role="alert" *ngIf="passwordSuccessMessage">
+                    <i antIcon type="check-circle" theme="outline" class="me-2"></i>
+                    {{ passwordSuccessMessage }}
+                  </div>
+
+                  <!-- Error Message -->
+                  <div class="alert alert-danger" role="alert" *ngIf="passwordErrorMessage">
+                    {{ passwordErrorMessage }}
+                  </div>
+
+                  <!-- Current Password -->
+                  <div class="form-group mb-3">
+                    <label class="form-label f-w-600 d-flex align-items-center" for="currentPassword">
+                      <i antIcon type="lock" theme="outline" class="me-2"></i>
+                      Mật khẩu hiện tại <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-wrapper input-group">
+                      <input
+                        [type]="showCurrentPassword ? 'text' : 'password'"
+                        id="currentPassword"
+                        formControlName="currentPassword"
+                        class="form-control"
+                        [class.is-invalid]="changePasswordForm.get('currentPassword')?.invalid && changePasswordForm.get('currentPassword')?.touched"
+                        placeholder="Nhập mật khẩu hiện tại"
+                      />
+                      <button
+                        type="button"
+                        class="password-toggle input-group-text"
+                        (click)="toggleCurrentPasswordVisibility()"
+                        tabindex="-1">
+                        <i antIcon [type]="showCurrentPassword ? 'eye-invisible' : 'eye'" theme="outline"></i>
+                      </button>
+                    </div>
+                    <div class="invalid-feedback d-block" *ngIf="changePasswordForm.get('currentPassword')?.invalid && changePasswordForm.get('currentPassword')?.touched">
+                      <div *ngIf="changePasswordForm.get('currentPassword')?.errors?.['required']">Mật khẩu hiện tại là bắt buộc</div>
+                    </div>
+                  </div>
+
+                  <!-- New Password -->
+                  <div class="form-group mb-3">
+                    <label class="form-label f-w-600 d-flex align-items-center" for="newPassword">
+                      <i antIcon type="lock" theme="outline" class="me-2"></i>
+                      Mật khẩu mới <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-wrapper input-group">
+                      <input
+                        [type]="showNewPassword ? 'text' : 'password'"
+                        id="newPassword"
+                        formControlName="newPassword"
+                        class="form-control"
+                        [class.is-invalid]="changePasswordForm.get('newPassword')?.invalid && changePasswordForm.get('newPassword')?.touched"
+                        placeholder="Nhập mật khẩu mới"
+                      />
+                      <button
+                        type="button"
+                        class="password-toggle input-group-text"
+                        (click)="toggleNewPasswordVisibility()"
+                        tabindex="-1">
+                        <i antIcon [type]="showNewPassword ? 'eye-invisible' : 'eye'" theme="outline"></i>
+                      </button>
+                    </div>
+                    <div class="invalid-feedback d-block" *ngIf="changePasswordForm.get('newPassword')?.invalid && changePasswordForm.get('newPassword')?.touched">
+                      <div *ngIf="changePasswordForm.get('newPassword')?.errors?.['required']">Mật khẩu mới là bắt buộc</div>
+                      <div *ngIf="changePasswordForm.get('newPassword')?.errors?.['minlength']">Mật khẩu phải có ít nhất 6 ký tự</div>
+                    </div>
+                  </div>
+
+                  <!-- Confirm Password -->
+                  <div class="form-group mb-3">
+                    <label class="form-label f-w-600 d-flex align-items-center" for="confirmPassword">
+                      <i antIcon type="lock" theme="outline" class="me-2"></i>
+                      Xác nhận mật khẩu <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-wrapper input-group">
+                      <input
+                        [type]="showConfirmPassword ? 'text' : 'password'"
+                        id="confirmPassword"
+                        formControlName="confirmPassword"
+                        class="form-control"
+                        [class.is-invalid]="changePasswordForm.get('confirmPassword')?.invalid && changePasswordForm.get('confirmPassword')?.touched || (changePasswordForm.errors?.['passwordMismatch'] && changePasswordForm.get('confirmPassword')?.touched)"
+                        placeholder="Xác nhận mật khẩu mới"
+                      />
+                      <button
+                        type="button"
+                        class="password-toggle input-group-text"
+                        (click)="toggleConfirmPasswordVisibility()"
+                        tabindex="-1">
+                        <i antIcon [type]="showConfirmPassword ? 'eye-invisible' : 'eye'" theme="outline"></i>
+                      </button>
+                    </div>
+                    <div class="invalid-feedback d-block" *ngIf="changePasswordForm.get('confirmPassword')?.invalid && changePasswordForm.get('confirmPassword')?.touched">
+                      <div *ngIf="changePasswordForm.get('confirmPassword')?.errors?.['required']">Xác nhận mật khẩu là bắt buộc</div>
+                    </div>
+                    <div class="invalid-feedback d-block" *ngIf="changePasswordForm.errors?.['passwordMismatch'] && changePasswordForm.get('confirmPassword')?.touched">
+                      Mật khẩu không khớp
+                    </div>
+                  </div>
+
+                  <!-- Action Button -->
+                  <div class="form-actions d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary" [disabled]="changePasswordForm.invalid || isChangingPassword">
+                      <span *ngIf="isChangingPassword" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      <i antIcon type="save" theme="outline" class="me-2" *ngIf="!isChangingPassword"></i>
+                      <span *ngIf="!isChangingPassword">Đổi mật khẩu</span>
+                      <span *ngIf="isChangingPassword">Đang xử lý...</span>
+                    </button>
+                  </div>
+                </form>
+              </ng-template>
+            </li>
+          </ul>
+          <div [ngbNavOutlet]="nav"></div>
+        </app-card>
+      </div>
+    </div>
+  </div>
+</div>

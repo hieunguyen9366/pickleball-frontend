@@ -1,0 +1,66 @@
+<div class="row">
+    <div class="col-sm-12">
+        <app-card cardTitle="Quản lý Cụm sân" [padding]="0">
+            <ng-template #headerOptionsTemplate>
+                <button class="btn btn-primary" (click)="openModal()">
+                    <i antIcon type="plus" theme="outline" class="me-1"></i> Thêm Cụm sân
+                </button>
+            </ng-template>
+
+            <!-- Loading State -->
+            <div *ngIf="isLoading" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+                <p class="text-muted mt-3 mb-0">Đang tải danh sách cụm sân...</p>
+            </div>
+
+            <!-- Error State -->
+            <div *ngIf="error && !isLoading" class="alert alert-danger m-3">
+                {{ error }}
+            </div>
+
+            <!-- Content -->
+            <div *ngIf="!isLoading && !error" class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên cụm sân</th>
+                            <th>Địa chỉ</th>
+                            <th>Thành phố</th>
+                            <th class="text-end">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of clusters">
+                            <td>{{ item.courtGroupId }}</td>
+                            <td>
+                                <h6 class="mb-0">{{ item.courtGroupName || 'N/A' }}</h6>
+                                <small class="text-muted">{{ item.district || '' }}</small>
+                            </td>
+                            <td>{{ item.address || 'N/A' }}</td>
+                            <td>{{ item.city || 'N/A' }}</td>
+                            <td class="text-end">
+                                <button class="btn btn-link-primary btn-sm" (click)="openModal(item)" title="Chỉnh sửa">
+                                    <i antIcon type="edit" theme="outline"></i>
+                                </button>
+                                <button class="btn btn-link-danger btn-sm" (click)="deleteCluster(item.courtGroupId)" title="Xóa">
+                                    <i antIcon type="delete" theme="outline"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr *ngIf="clusters.length === 0">
+                            <td colspan="5" class="text-center p-4">
+                                <p class="text-muted mb-0">Chưa có cụm sân nào.</p>
+                                <button class="btn btn-primary btn-sm mt-2" (click)="openModal()">
+                                    <i antIcon type="plus" theme="outline" class="me-1"></i> Thêm cụm sân đầu tiên
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </app-card>
+    </div>
+</div>

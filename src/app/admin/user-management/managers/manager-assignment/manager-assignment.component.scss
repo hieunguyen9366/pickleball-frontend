@@ -1,0 +1,20 @@
+.manager-assignment-page {
+  .list-group-item {
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: var(--bs-gray-50);
+    }
+  }
+
+  .form-check-input {
+    cursor: pointer;
+  }
+
+  .form-check-label {
+    cursor: pointer;
+  }
+}
+
+
+

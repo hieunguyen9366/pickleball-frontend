@@ -1,0 +1,73 @@
+<div class="modal-header">
+  <h4 class="modal-title">{{ config ? 'Chỉnh sửa' : 'Thêm mới' }} Cấu hình Khung giờ</h4>
+  <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
+</div>
+<div class="modal-body">
+  <form>
+    <div *ngIf="error" class="alert alert-danger mb-3">{{ error }}</div>
+    <div class="mb-3">
+      <label class="form-label">Áp dụng cho <span class="text-danger">*</span></label>
+      <div class="row g-2">
+        <div class="col-md-6">
+          <select class="form-select" [(ngModel)]="formData.courtGroupId" name="courtGroupId"
+            (ngModelChange)="onCourtGroupChange()">
+            <option [ngValue]="undefined">Chọn cụm sân (tùy chọn)</option>
+            <option *ngFor="let group of courtGroups" [ngValue]="group.courtGroupId">
+              {{ group.courtGroupName }}
+            </option>
+          </select>
+          <small class="text-muted">Áp dụng cho tất cả sân trong cụm</small>
+        </div>
+        <div class="col-md-6">
+          <select class="form-select" [(ngModel)]="formData.courtId" name="courtId" (ngModelChange)="onCourtChange()">
+            <option [ngValue]="undefined">Chọn sân cụ thể (tùy chọn)</option>
+            <option *ngFor="let court of courts" [ngValue]="court.courtId">
+              {{ court.courtName }}
+            </option>
+          </select>
+          <small class="text-muted">Áp dụng cho sân cụ thể (ưu tiên cao hơn)</small>
+        </div>
+      </div>
+      <small class="text-info d-block mt-1">
+        <i class="bi bi-info-circle"></i> Phải chọn ít nhất một trong hai: Cụm sân hoặc Sân cụ thể.
+      </small>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Giờ mở cửa</label>
+        <input type="time" class="form-control" [(ngModel)]="formData.openTime" name="openTime" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Giờ đóng cửa</label>
+        <input type="time" class="form-control" [(ngModel)]="formData.closeTime" name="closeTime" required>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Độ dài mỗi slot (phút)</label>
+      <select class="form-select" [(ngModel)]="formData.slotDuration" name="slotDuration">
+        <option *ngFor="let duration of slotDurationOptions" [value]="duration">
+          {{ duration }} phút
+        </option>
+      </select>
+      <small class="text-muted">Thời gian của mỗi khung giờ (30 phút hoặc 60 phút)</small>
+    </div>
+
+    <div class="mb-3">
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" [(ngModel)]="formData.isActive" name="isActive" id="isActive">
+        <label class="form-check-label" for="isActive">
+          Kích hoạt cấu hình này
+        </label>
+      </div>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="isLoading">Hủy</button>
+  <button type="button" class="btn btn-primary" (click)="save()" [disabled]="isLoading">
+    <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+    {{ isLoading ? 'Đang lưu...' : 'Lưu' }}
+  </button>
+</div>

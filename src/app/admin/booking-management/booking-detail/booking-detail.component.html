@@ -1,0 +1,189 @@
+<div class="booking-detail-page">
+  <div class="container-fluid">
+    <!-- Loading -->
+    <div class="row" *ngIf="isLoading && !booking">
+      <div class="col-12">
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+          </div>
+          <p class="text-muted mt-3 mb-0">Đang tải thông tin đặt sân...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div class="row" *ngIf="error && !isLoading">
+      <div class="col-12">
+        <div class="alert alert-danger">
+          {{ error }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="row" *ngIf="!isLoading && booking">
+      <div class="col-12">
+        <app-card [showHeader]="false" blockClass="booking-detail-card">
+          <ng-template #headerOptionsTemplate>
+            <button class="btn btn-secondary me-2" (click)="goBack()">
+              <i antIcon type="arrow-left" theme="outline" class="me-1"></i> Quay lại
+            </button>
+            <button class="btn btn-primary me-2" (click)="editBooking()" 
+                    *ngIf="booking.status !== BookingStatus.CANCELLED && booking.status !== BookingStatus.COMPLETED">
+              <i antIcon type="edit" theme="outline" class="me-1"></i> Sửa
+            </button>
+            <button class="btn btn-danger" (click)="cancelBooking()"
+                    *ngIf="booking.status !== BookingStatus.CANCELLED && booking.status !== BookingStatus.COMPLETED">
+              <i antIcon type="delete" theme="outline" class="me-1"></i> Hủy
+            </button>
+          </ng-template>
+
+          <div class="p-3">
+            <!-- Booking Status -->
+            <div class="mb-4 pb-3 border-bottom">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <h4 class="mb-2">Mã đặt sân: #{{ booking.bookingId }}</h4>
+                  <span [class]="getStatusClass(booking.status)">{{ getStatusLabel(booking.status) }}</span>
+                </div>
+                <div class="text-end">
+                  <div class="h5 text-primary mb-0">{{ booking.totalPrice | number:'1.0-0' }} ₫</div>
+                  <small class="text-muted">Tổng thanh toán</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Court Information -->
+            <div class="mb-4">
+              <h5 class="mb-3 border-bottom pb-2">
+                <i antIcon type="environment" theme="outline" class="me-2"></i>
+                Thông tin sân
+              </h5>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <p class="mb-2"><strong>Tên sân:</strong> {{ booking.court?.courtName || 'N/A' }}</p>
+                  <p class="mb-2"><strong>Địa chỉ:</strong> {{ booking.court?.location || 'N/A' }}</p>
+                </div>
+                <div class="col-md-6">
+                  <p class="mb-2" *ngIf="booking.court?.phone">
+                    <strong>Số điện thoại:</strong> {{ booking.court.phone }}
+                  </p>
+                  <p class="mb-0" *ngIf="booking.court?.district || booking.court?.city">
+                    <strong>Khu vực:</strong> {{ booking.court?.district }}{{ booking.court?.district && booking.court?.city ? ', ' : '' }}{{ booking.court?.city }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Booking Details -->
+            <div class="mb-4">
+              <h5 class="mb-3 border-bottom pb-2">
+                <i antIcon type="calendar" theme="outline" class="me-2"></i>
+                Thông tin đặt sân
+              </h5>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <p class="mb-2">
+                    <strong><i antIcon type="calendar" theme="outline" class="me-1"></i> Ngày đặt:</strong>
+                    {{ booking.bookingDate | date:'dd/MM/yyyy' }}
+                  </p>
+                  <p class="mb-2">
+                    <strong><i antIcon type="clock-circle" theme="outline" class="me-1"></i> Khung giờ:</strong>
+                    {{ booking.startTime }} - {{ booking.endTime }}
+                  </p>
+                </div>
+                <div class="col-md-6">
+                  <p class="mb-2">
+                    <strong>Giá sân:</strong>
+                    {{ getCourtPrice() | number:'1.0-0' }} ₫
+                  </p>
+                  <p class="mb-0">
+                    <strong>Thời gian tạo:</strong>
+                    {{ booking.createdAt | date:'dd/MM/yyyy HH:mm' }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Services -->
+            <div class="mb-4" *ngIf="booking.services && booking.services.length > 0">
+              <h5 class="mb-3 border-bottom pb-2">
+                <i antIcon type="shopping-cart" theme="outline" class="me-2"></i>
+                Dịch vụ đi kèm
+              </h5>
+              <div class="table-responsive">
+                <table class="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>Dịch vụ</th>
+                      <th>Số lượng</th>
+                      <th>Đơn giá</th>
+                      <th class="text-end">Thành tiền</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let service of booking.services">
+                      <td>{{ service.service?.serviceName || 'N/A' }}</td>
+                      <td>{{ service.quantity }}</td>
+                      <td>{{ service.unitPrice | number:'1.0-0' }} ₫</td>
+                      <td class="text-end">{{ service.totalPrice | number:'1.0-0' }} ₫</td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="3" class="text-end"><strong>Tổng dịch vụ:</strong></td>
+                      <td class="text-end">
+                        <strong>{{ getTotalServicesPrice() | number:'1.0-0' }} ₫</strong>
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+
+            <!-- Payment Information -->
+            <div class="mb-4" *ngIf="booking.payment">
+              <h5 class="mb-3 border-bottom pb-2">
+                <i antIcon type="dollar" theme="outline" class="me-2"></i>
+                Thông tin thanh toán
+              </h5>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <p class="mb-2"><strong>Phương thức:</strong> {{ booking.payment.paymentMethod }}</p>
+                  <p class="mb-0"><strong>Trạng thái:</strong> {{ booking.payment.status }}</p>
+                </div>
+                <div class="col-md-6">
+                  <p class="mb-0"><strong>Ngày thanh toán:</strong> {{ booking.payment.paidAt | date:'dd/MM/yyyy HH:mm' }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="mt-4 pt-3 border-top" *ngIf="booking.status !== BookingStatus.CANCELLED && booking.status !== BookingStatus.COMPLETED">
+              <h6 class="mb-3">Thao tác nhanh</h6>
+              <div class="btn-group" role="group">
+                <button class="btn btn-success" 
+                        *ngIf="booking.status === BookingStatus.PENDING"
+                        (click)="updateStatus(BookingStatus.CONFIRMED)">
+                  <i antIcon type="check-circle" theme="outline" class="me-1"></i> Xác nhận
+                </button>
+                <button class="btn btn-primary" 
+                        *ngIf="booking.status === BookingStatus.CONFIRMED"
+                        (click)="updateStatus(BookingStatus.PAID)">
+                  <i antIcon type="dollar" theme="outline" class="me-1"></i> Đánh dấu đã thanh toán
+                </button>
+                <button class="btn btn-info" 
+                        *ngIf="booking.status === BookingStatus.PAID"
+                        (click)="updateStatus(BookingStatus.COMPLETED)">
+                  <i antIcon type="check-circle" theme="outline" class="me-1"></i> Hoàn thành
+                </button>
+              </div>
+            </div>
+          </div>
+        </app-card>
+      </div>
+    </div>
+  </div>
+</div>
+
