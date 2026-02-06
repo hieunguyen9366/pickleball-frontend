@@ -33,8 +33,11 @@ export class ClusterModalComponent implements OnInit {
     isLoading = false;
     error = '';
 
-    selectedImageFile: File | null = null;
-    imagePreviewUrl: string | null = null;
+    selectedImageFiles: File[] = [];
+    imagePreviewUrls: string[] = [];
+
+    // Gallery
+    courtImages: any[] = []; // CourtImageData
 
     ngOnInit(): void {
         this.loadManagers();
@@ -63,6 +66,10 @@ export class ClusterModalComponent implements OnInit {
             description: [initialData.description],
             managerId: [initialData.managerId]
         });
+
+        if (this.cluster) {
+            this.loadImages();
+        }
     }
 
     loadManagers() {
@@ -78,23 +85,105 @@ export class ClusterModalComponent implements OnInit {
         });
     }
 
-    onImageSelected(event: Event): void {
-        const input = event.target as HTMLInputElement;
-        if (!input.files || input.files.length === 0) {
-            this.selectedImageFile = null;
-            this.imagePreviewUrl = null;
+    loadImages() {
+        if (!this.cluster) return;
+        this.courtService.getCourtGroupImages(this.cluster.courtGroupId).subscribe({
+            next: (images) => {
+                this.courtImages = images;
+                this.cdr.detectChanges();
+            },
+            error: (err) => console.error('Failed to load images', err)
+        });
+    }
+
+    deleteImage(imageId: number) {
+        if (!confirm('Bạn có chắc chắn muốn xóa ảnh này?')) return;
+
+        this.courtService.deleteCourtGroupImage(imageId).subscribe({
+            next: () => {
+                this.toastService.success('Đã xóa ảnh thành công');
+                this.loadImages();
+            },
+            error: (err) => {
+                this.toastService.error('Không thể xóa ảnh');
+                console.error(err);
+            }
+        });
+    }
+
+    moveImage(index: number, direction: 'left' | 'right') {
+        if (direction === 'left' && index > 0) {
+            const temp = this.courtImages[index];
+            this.courtImages[index] = this.courtImages[index - 1];
+            this.courtImages[index - 1] = temp;
+        } else if (direction === 'right' && index < this.courtImages.length - 1) {
+            const temp = this.courtImages[index];
+            this.courtImages[index] = this.courtImages[index + 1];
+            this.courtImages[index + 1] = temp;
+        } else {
             return;
         }
 
-        const file = input.files[0];
-        this.selectedImageFile = file;
+        // Save new order
+        const imageIds = this.courtImages.map(img => img.imageId);
+        if (this.cluster) {
+            this.courtService.updateCourtGroupImageOrder(this.cluster.courtGroupId, imageIds).subscribe({
+                next: () => {
+                    // Order updated silently
+                },
+                error: (err) => console.error('Failed to update order', err)
+            });
+        }
+        this.cdr.detectChanges();
+    }
 
-        const reader = new FileReader();
-        reader.onload = () => {
-            this.imagePreviewUrl = reader.result as string;
-            this.cdr.detectChanges();
-        };
-        reader.readAsDataURL(file);
+    onImageSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        if (!input.files || input.files.length === 0) {
+            this.selectedImageFiles = [];
+            this.imagePreviewUrls = [];
+            return;
+        }
+
+        this.selectedImageFiles = Array.from(input.files);
+        this.imagePreviewUrls = [];
+
+        this.selectedImageFiles.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                this.imagePreviewUrls.push(reader.result as string);
+                this.cdr.detectChanges();
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // Quick upload button for existing cluster
+    uploadImage() {
+        if (!this.cluster || this.selectedImageFiles.length === 0) return;
+
+        this.isLoading = true;
+        this.courtService.uploadCourtGroupImages(this.cluster.courtGroupId, this.selectedImageFiles).subscribe({
+            next: () => {
+                this.isLoading = false;
+                this.selectedImageFiles = [];
+                this.imagePreviewUrls = [];
+                this.toastService.success('Đã tải ảnh lên thành công');
+                this.loadImages();
+
+                // Reset file input
+                const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+                if (fileInput) fileInput.value = '';
+
+                this.cdr.detectChanges();
+            },
+            error: (err) => {
+                this.isLoading = false;
+                this.toastService.error('Tải ảnh thất bại');
+                console.error(err);
+                this.cdr.detectChanges();
+            }
+        });
     }
 
     save(): void {
@@ -119,8 +208,8 @@ export class ClusterModalComponent implements OnInit {
 
         if (this.cluster) {
             // Update
-            const updated: CourtGroup = { 
-                ...this.cluster, 
+            const updated: CourtGroup = {
+                ...this.cluster,
                 courtGroupName: value.courtGroupName,
                 address: value.address,
                 district: value.district,
@@ -130,9 +219,9 @@ export class ClusterModalComponent implements OnInit {
             };
             this.courtService.updateCourtGroup(this.cluster.courtGroupId, updated).subscribe({
                 next: () => {
-                    // Nếu có chọn ảnh mới thì upload sau khi cập nhật thông tin
-                    if (this.selectedImageFile) {
-                        this.courtService.uploadCourtGroupImage(this.cluster!.courtGroupId, this.selectedImageFile).subscribe({
+                    // Nếu có chọn ảnh mới và chưa upload
+                    if (this.selectedImageFiles.length > 0 && !this.courtImages.length) {
+                        this.courtService.uploadCourtGroupImages(this.cluster!.courtGroupId, this.selectedImageFiles).subscribe({
                             next: () => {
                                 this.isLoading = false;
                                 this.cdr.detectChanges();
@@ -146,6 +235,7 @@ export class ClusterModalComponent implements OnInit {
                                 this.error = errorMsg;
                                 this.toastService.error(errorMsg, 'Lỗi lưu ảnh');
                                 this.isLoading = false;
+                                this.loadImages(); // Refresh list to be sure
                                 this.cdr.detectChanges();
                             }
                         });
@@ -180,8 +270,8 @@ export class ClusterModalComponent implements OnInit {
             this.courtService.createCourtGroup(newGroup).subscribe({
                 next: (created) => {
                     // Nếu có chọn ảnh thì upload sau khi tạo cụm sân
-                    if (this.selectedImageFile && created && created.courtGroupId) {
-                        this.courtService.uploadCourtGroupImage(created.courtGroupId, this.selectedImageFile).subscribe({
+                    if (this.selectedImageFiles.length > 0 && created && created.courtGroupId) {
+                        this.courtService.uploadCourtGroupImages(created.courtGroupId, this.selectedImageFiles).subscribe({
                             next: () => {
                                 this.isLoading = false;
                                 this.cdr.detectChanges();

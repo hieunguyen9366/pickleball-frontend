@@ -12,13 +12,14 @@ import {
   CourtImageData
 } from '../models/court.model';
 import { ApiService } from '../../common/api.service';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CourtService {
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService) { }
 
   searchCourts(request: CourtSearchRequest): Observable<CourtSearchResponse> {
     const params: any = {
@@ -28,36 +29,42 @@ export class CourtService {
 
     // Search term
     if (request.searchTerm) params.searchTerm = request.searchTerm;
-    
+
     // Location filters
     if (request.district) params.district = request.district;
     if (request.city) params.city = request.city;
     if (request.courtGroupId) params.courtGroupId = request.courtGroupId;
-    
+
     // Time filters
     if (request.date) params.date = request.date;
     if (request.startTime) params.startTime = request.startTime;
     if (request.endTime) params.endTime = request.endTime;
-    
+
     // Price filters
     if (request.minPrice) params.minPrice = request.minPrice;
     if (request.maxPrice) params.maxPrice = request.maxPrice;
-    
+
     // Rating filter
     if (request.minRating) params.minRating = request.minRating;
-    
+
     // Amenities filter
     if (request.amenities && request.amenities.length > 0) {
       params.amenities = request.amenities;
     }
-    
+
     // Sorting
     if (request.sortBy) params.sortBy = request.sortBy;
-    
+
     // Status filter
     if (request.status) params.status = request.status;
 
     return this.apiService.get<CourtSearchResponse>('courts/search', { params }).pipe(
+      map((response: any) => {
+        if (response && response.courts) {
+          response.courts = response.courts.map((c: any) => this.mapCourtDTOToCourt(c));
+        }
+        return response;
+      }),
       catchError(error => {
         console.error('Error searching courts:', error);
         return throwError(() => error);
@@ -141,7 +148,8 @@ export class CourtService {
   }
 
   getCourtById(courtId: number): Observable<CourtDetail> {
-    return this.apiService.get<CourtDetail>(`courts/${courtId}`).pipe(
+    return this.apiService.get<any>(`courts/${courtId}`).pipe(
+      map((dto: any) => this.mapCourtDetailDTOToCourtDetail(dto)),
       catchError(error => {
         console.error('Error loading court:', error);
         return throwError(() => error);
@@ -156,7 +164,7 @@ export class CourtService {
     if (managerId) params.managerId = managerId;
 
     return this.apiService.get<any[]>('courts/groups', { params }).pipe(
-      map((groups: any[]) => groups.map(g => this.mapCourtGroupDTOToCourtGroup(g))),
+      map((groups: any[]) => groups.map((g: any) => this.mapCourtGroupDTOToCourtGroup(g))),
       catchError(error => {
         console.error('Error loading court groups:', error);
         return throwError(() => error);
@@ -259,7 +267,7 @@ export class CourtService {
       city: dto.city || '',
       pricePerHour: dto.basePricePerHour ? Number(dto.basePricePerHour) : (dto.pricePerHour ? Number(dto.pricePerHour) : 0), // Backend dùng basePricePerHour
       status: dto.status as CourtStatus || CourtStatus.AVAILABLE,
-      images: dto.images ? (Array.isArray(dto.images) ? dto.images : [dto.images]) : [],
+      images: [], // Will be set below
       courtImageIds: dto.courtImageIds || dto.court_image_ids || [],
       courtGroupImageIds: dto.courtGroupImageIds || dto.court_group_image_ids || [],
       description: dto.description || '',
@@ -270,6 +278,22 @@ export class CourtService {
       createdAt: dto.createdAt ? new Date(dto.createdAt) : undefined,
       updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined
     };
+
+    // Map Images
+    if (dto.imageList && dto.imageList.length > 0) {
+      // Priority 1: Direct Base64 list (Detail API)
+      court.images = dto.imageList;
+    } else if (court.courtImageIds && court.courtImageIds.length > 0) {
+      // Priority 2: Court Images via URL (Search API)
+      court.images = court.courtImageIds.map((id: number) => `${environment.apiUrl}/courts/images/${id}/view`);
+    } else if (court.courtGroupImageIds && court.courtGroupImageIds.length > 0) {
+      // Priority 3: Court Group Images via URL (Search API fallback)
+      court.images = court.courtGroupImageIds.map((id: number) => `${environment.apiUrl}/courts/groups/images/${id}/view`);
+    } else if (dto.images) {
+      // Priority 4: Legacy images string/array
+      court.images = Array.isArray(dto.images) ? dto.images : [dto.images];
+    }
+
     return court;
   }
 
@@ -282,6 +306,19 @@ export class CourtService {
       courtName: court.courtName,
       status: court.status,
       basePricePerHour: court.pricePerHour // Frontend dùng pricePerHour, backend expect basePricePerHour
+    };
+  }
+
+  /**
+   * Map từ backend DTO sang frontend CourtDetail model
+   */
+  private mapCourtDetailDTOToCourtDetail(dto: any): CourtDetail {
+    const court = this.mapCourtDTOToCourt(dto);
+    return {
+      ...court,
+      availableTimeSlots: dto.availableTimeSlots || [],
+      reviews: dto.reviews || [],
+      averageRating: dto.averageRating
     };
   }
 
@@ -306,9 +343,7 @@ export class CourtService {
   }
 
   uploadCourtImage(courtId: number, file: File): Observable<number[]> {
-    const formData = new FormData();
-    formData.append('file', file);
-    return this.apiService.post<number[]>(`courts/${courtId}/images`, formData).pipe(
+    return this.apiService.uploadFile<number[]>(`courts/${courtId}/images`, file).pipe(
       catchError(error => {
         console.error('Error uploading court image:', error);
         return throwError(() => error);
@@ -316,12 +351,64 @@ export class CourtService {
     );
   }
 
+  uploadCourtImages(courtId: number, files: File[]): Observable<number[]> {
+    return this.apiService.uploadFiles<number[]>(`courts/${courtId}/images/batch`, files).pipe(
+      catchError(error => {
+        console.error('Error uploading court images:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
   uploadCourtGroupImage(courtGroupId: number, file: File): Observable<number[]> {
-    const formData = new FormData();
-    formData.append('file', file);
-    return this.apiService.post<number[]>(`courts/groups/${courtGroupId}/images`, formData).pipe(
+    return this.apiService.uploadFile<number[]>(`courts/groups/${courtGroupId}/images`, file).pipe(
       catchError(error => {
         console.error('Error uploading court group image:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  uploadCourtGroupImages(courtGroupId: number, files: File[]): Observable<number[]> {
+    return this.apiService.uploadFiles<number[]>(`courts/groups/${courtGroupId}/images/batch`, files).pipe(
+      catchError(error => {
+        console.error('Error uploading court group images:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  deleteCourtImage(imageId: number): Observable<void> {
+    return this.apiService.delete<void>(`courts/images/${imageId}`).pipe(
+      catchError(error => {
+        console.error('Error deleting court image:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  deleteCourtGroupImage(imageId: number): Observable<void> {
+    return this.apiService.delete<void>(`courts/groups/images/${imageId}`).pipe(
+      catchError(error => {
+        console.error('Error deleting court group image:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  updateCourtImageOrder(courtId: number, imageIds: number[]): Observable<void> {
+    return this.apiService.put<void>(`courts/${courtId}/images/order`, imageIds).pipe(
+      catchError(error => {
+        console.error('Error updating court image order:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  updateCourtGroupImageOrder(courtGroupId: number, imageIds: number[]): Observable<void> {
+    return this.apiService.put<void>(`courts/groups/${courtGroupId}/images/order`, imageIds).pipe(
+      catchError(error => {
+        console.error('Error updating court group image order:', error);
         return throwError(() => error);
       })
     );

@@ -271,6 +271,35 @@ export class ApiService {
     }
 
     /**
+     * Upload multiple files
+     */
+    uploadFiles<T = any>(endpoint: string, files: File[], options?: ApiRequestOptions): Observable<T> {
+        const url = this.buildUrl(endpoint);
+        const formData = new FormData();
+        files.forEach(file => {
+            formData.append('files', file);
+        });
+
+        const headers = this.buildHeaders(options?.headers, false); // Don't set Content-Type for FormData
+
+        const httpOptions: any = {
+            headers
+        };
+
+        // Only add optional properties if they exist
+        if (options?.reportProgress !== undefined) {
+            httpOptions.reportProgress = options.reportProgress;
+        }
+
+        const observable = this.http.post<ApiResponse<T> | T>(url, formData, httpOptions);
+
+        return observable.pipe(
+            map((response) => this.extractData<T>(response)),
+            catchError((error) => this.handleError(error))
+        );
+    }
+
+    /**
      * Download file
      */
     downloadFile(endpoint: string, options?: ApiRequestOptions): Observable<Blob> {

@@ -31,8 +31,11 @@ export class CourtModalComponent implements OnInit {
 
     courtStatuses = Object.values(CourtStatus);
 
-    selectedImageFile: File | null = null;
-    imagePreviewUrl: string | null = null;
+    selectedImageFiles: File[] = [];
+    imagePreviewUrls: string[] = [];
+
+    // GalleryManager for Courts
+    courtImages: any[] = [];
 
     ngOnInit(): void {
         // Load Court Groups for Dropdown
@@ -96,25 +99,111 @@ export class CourtModalComponent implements OnInit {
                 }
             });
         }
+
+        if (this.court) {
+            this.loadImages();
+        }
+    }
+
+    loadImages() {
+        if (!this.court) return;
+        this.courtService.getCourtImages(this.court.courtId).subscribe({
+            next: (images) => {
+                this.courtImages = images;
+                this.cdr.detectChanges();
+            },
+            error: (err) => console.error('Failed to load images', err)
+        });
+    }
+
+    deleteImage(imageId: number) {
+        if (!confirm('Bạn có chắc chắn muốn xóa ảnh này?')) return;
+
+        this.courtService.deleteCourtImage(imageId).subscribe({
+            next: () => {
+                this.toastService.success('Đã xóa ảnh thành công');
+                this.loadImages();
+            },
+            error: (err) => {
+                this.toastService.error('Không thể xóa ảnh');
+                console.error(err);
+            }
+        });
+    }
+
+    moveImage(index: number, direction: 'left' | 'right') {
+        if (direction === 'left' && index > 0) {
+            const temp = this.courtImages[index];
+            this.courtImages[index] = this.courtImages[index - 1];
+            this.courtImages[index - 1] = temp;
+        } else if (direction === 'right' && index < this.courtImages.length - 1) {
+            const temp = this.courtImages[index];
+            this.courtImages[index] = this.courtImages[index + 1];
+            this.courtImages[index + 1] = temp;
+        } else {
+            return;
+        }
+
+        // Save new order
+        const imageIds = this.courtImages.map(img => img.imageId);
+        if (this.court) {
+            this.courtService.updateCourtImageOrder(this.court.courtId, imageIds).subscribe({
+                next: () => {
+                    // Order updated silently
+                },
+                error: (err) => console.error('Failed to update order', err)
+            });
+        }
+        this.cdr.detectChanges();
     }
 
     onImageSelected(event: Event): void {
         const input = event.target as HTMLInputElement;
         if (!input.files || input.files.length === 0) {
-            this.selectedImageFile = null;
-            this.imagePreviewUrl = null;
+            this.selectedImageFiles = [];
+            this.imagePreviewUrls = [];
             return;
         }
 
-        const file = input.files[0];
-        this.selectedImageFile = file;
+        this.selectedImageFiles = Array.from(input.files);
+        this.imagePreviewUrls = [];
 
-        const reader = new FileReader();
-        reader.onload = () => {
-            this.imagePreviewUrl = reader.result as string;
-            this.cdr.detectChanges();
-        };
-        reader.readAsDataURL(file);
+        this.selectedImageFiles.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                this.imagePreviewUrls.push(reader.result as string);
+                this.cdr.detectChanges();
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // Quick upload button for existing court
+    uploadImage() {
+        if (!this.court || this.selectedImageFiles.length === 0) return;
+
+        this.isLoading = true;
+        this.courtService.uploadCourtImages(this.court.courtId, this.selectedImageFiles).subscribe({
+            next: () => {
+                this.isLoading = false;
+                this.selectedImageFiles = [];
+                this.imagePreviewUrls = [];
+                this.toastService.success('Đã tải ảnh lên thành công');
+                this.loadImages();
+
+                // Reset file input
+                const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+                if (fileInput) fileInput.value = '';
+
+                this.cdr.detectChanges();
+            },
+            error: (err) => {
+                this.isLoading = false;
+                this.toastService.error('Tải ảnh thất bại');
+                console.error(err);
+                this.cdr.detectChanges();
+            }
+        });
     }
 
     save(): void {
@@ -163,8 +252,8 @@ export class CourtModalComponent implements OnInit {
             this.courtService.updateCourt(this.court.courtId, courtData).subscribe({
                 next: () => {
                     // Nếu có chọn ảnh mới thì upload sau khi cập nhật thông tin sân
-                    if (this.selectedImageFile) {
-                        this.courtService.uploadCourtImage(this.court!.courtId, this.selectedImageFile).subscribe({
+                    if (this.selectedImageFiles.length > 0 && !this.courtImages.length) {
+                        this.courtService.uploadCourtImages(this.court!.courtId, this.selectedImageFiles).subscribe({
                             next: () => {
                                 this.isLoading = false;
                                 this.cdr.detectChanges();
@@ -178,6 +267,7 @@ export class CourtModalComponent implements OnInit {
                                 this.error = errorMsg;
                                 this.toastService.error(errorMsg, 'Lỗi lưu ảnh');
                                 this.isLoading = false;
+                                this.loadImages();
                                 this.cdr.detectChanges();
                             }
                         });
@@ -203,8 +293,8 @@ export class CourtModalComponent implements OnInit {
             this.courtService.createCourt(courtData).subscribe({
                 next: (created) => {
                     // Nếu có chọn ảnh thì upload sau khi tạo sân
-                    if (this.selectedImageFile && created && created.courtId) {
-                        this.courtService.uploadCourtImage(created.courtId, this.selectedImageFile).subscribe({
+                    if (this.selectedImageFiles.length > 0 && created && created.courtId) {
+                        this.courtService.uploadCourtImages(created.courtId, this.selectedImageFiles).subscribe({
                             next: () => {
                                 this.isLoading = false;
                                 this.cdr.detectChanges();

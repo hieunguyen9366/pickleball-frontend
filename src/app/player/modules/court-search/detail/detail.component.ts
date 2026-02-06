@@ -83,18 +83,20 @@ export class DetailComponent implements OnInit {
           location: detail.address || '',
           district: detail.district || '',
           city: detail.city || '',
-          pricePerHour: typeof detail.basePricePerHour === 'number' 
-            ? detail.basePricePerHour 
+          pricePerHour: typeof detail.basePricePerHour === 'number'
+            ? detail.basePricePerHour
             : (detail.basePricePerHour?.toNumber?.() || courtDetail.pricePerHour || 0),
           status: courtDetail.status,
-          images: Array.isArray(courtDetail.images) ? courtDetail.images : (detail.images ? [detail.images] : []),
+          images: (courtDetail as any).imageList && (courtDetail as any).imageList.length > 0
+            ? (courtDetail as any).imageList
+            : (Array.isArray(courtDetail.images) ? courtDetail.images : (detail.images ? [detail.images] : [])),
           description: detail.description || '',
           amenities: [],
           phone: '',
           rating: detail.averageRating || 0,
           reviewCount: 0
         };
-        
+
         // Generate mock reviews based on reviewCount
         this.generateMockReviews();
         this.isLoading = false;

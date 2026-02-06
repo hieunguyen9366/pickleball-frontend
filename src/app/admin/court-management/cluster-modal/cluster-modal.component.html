@@ -10,13 +10,14 @@
             <input type="text" class="form-control" formControlName="courtGroupName"
                 [class.is-invalid]="form.get('courtGroupName')?.invalid && form.get('courtGroupName')?.touched"
                 placeholder="Ví dụ: Cụm sân Pickleball Quận 1">
-            <div class="invalid-feedback" *ngIf="form.get('courtGroupName')?.invalid && form.get('courtGroupName')?.touched">
+            <div class="invalid-feedback"
+                *ngIf="form.get('courtGroupName')?.invalid && form.get('courtGroupName')?.touched">
                 Tên cụm sân là bắt buộc.
             </div>
         </div>
         <div class="mb-3">
             <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" formControlName="address" 
+            <input type="text" class="form-control" formControlName="address"
                 [class.is-invalid]="form.get('address')?.invalid && form.get('address')?.touched"
                 placeholder="Ví dụ: 123 Nguyễn Huệ">
             <div class="invalid-feedback" *ngIf="form.get('address')?.invalid && form.get('address')?.touched">
@@ -34,7 +35,7 @@
         <div class="row">
             <div class="col-md-6 mb-3">
                 <label class="form-label">Quận/Huyện <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" formControlName="district" 
+                <input type="text" class="form-control" formControlName="district"
                     [class.is-invalid]="form.get('district')?.invalid && form.get('district')?.touched"
                     placeholder="Ví dụ: Quận 1">
                 <div class="invalid-feedback" *ngIf="form.get('district')?.invalid && form.get('district')?.touched">
@@ -43,7 +44,7 @@
             </div>
             <div class="col-md-6 mb-3">
                 <label class="form-label">Thành phố <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" formControlName="city" 
+                <input type="text" class="form-control" formControlName="city"
                     [class.is-invalid]="form.get('city')?.invalid && form.get('city')?.touched"
                     placeholder="Ví dụ: TP. Hồ Chí Minh">
                 <div class="invalid-feedback" *ngIf="form.get('city')?.invalid && form.get('city')?.touched">
@@ -57,9 +58,57 @@
         </div>
         <div class="mb-3">
             <label class="form-label">Ảnh cụm sân</label>
-            <input type="file" class="form-control" accept="image/*" (change)="onImageSelected($event)">
-            <div *ngIf="imagePreviewUrl" class="mt-2">
-                <img [src]="imagePreviewUrl" alt="Ảnh cụm sân" class="img-thumbnail" style="max-height: 150px;">
+
+            <!-- Gallery -->
+            <div *ngIf="courtImages && courtImages.length > 0" class="row mb-3">
+                <div class="col-6 col-md-4 mb-3" *ngFor="let img of courtImages; let i = index">
+                    <div class="card h-100">
+                        <img [src]="'data:' + img.contentType + ';base64,' + img.data" class="card-img-top"
+                            style="height: 120px; object-fit: cover;" alt="Image">
+                        <div class="card-footer d-flex justify-content-between p-1">
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                (click)="moveImage(i, 'left')" [disabled]="i === 0" title="Move Left/Up">
+                                <i class="fas fa-chevron-left"></i> &lt;
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                (click)="deleteImage(img.imageId)" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                (click)="moveImage(i, 'right')" [disabled]="i === courtImages.length - 1"
+                                title="Move Right/Down">
+                                &gt; <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload New -->
+            <label class="form-label small text-muted">Thêm ảnh mới</label>
+            <div class="input-group">
+                <input type="file" id="fileInput" class="form-control" accept="image/*" multiple
+                    (change)="onImageSelected($event)">
+                <button class="btn btn-outline-primary" type="button" (click)="uploadImage()"
+                    [disabled]="selectedImageFiles.length === 0 || !cluster">
+                    Upload Ngay
+                </button>
+            </div>
+
+            <!-- Previews -->
+            <div *ngIf="imagePreviewUrls.length > 0 && !cluster" class="mt-2 row">
+                <div class="col-4 col-md-3 mb-2" *ngFor="let url of imagePreviewUrls">
+                    <img [src]="url" alt="Preview" class="img-thumbnail"
+                        style="max-height: 100px; width: 100%; object-fit: cover;">
+                </div>
+                <div class="col-12 text-muted small mt-1">Ảnh sẽ được lưu khi tạo cụm sân.</div>
+            </div>
+            <!-- Previews for Upload Immediately mode (when cluster exists but not yet clicked Upload) -->
+            <div *ngIf="imagePreviewUrls.length > 0 && cluster" class="mt-2 row">
+                <div class="col-4 col-md-3 mb-2" *ngFor="let url of imagePreviewUrls">
+                    <img [src]="url" alt="Preview" class="img-thumbnail"
+                        style="max-height: 100px; width: 100%; object-fit: cover;">
+                </div>
             </div>
         </div>
     </form>
