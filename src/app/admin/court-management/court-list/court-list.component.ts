@@ -26,6 +26,10 @@ export class CourtListComponent implements OnInit {
     private cdr = inject(ChangeDetectorRef);
 
     courts: Court[] = [];
+    /**
+     * Cache primary image data URL per courtId to avoid reloading on every change detection.
+     */
+    courtImageCache: { [courtId: number]: string } = {};
     isLoading = false;
     error = '';
 
@@ -43,6 +47,8 @@ export class CourtListComponent implements OnInit {
         this.courtService.searchCourts({ pageSize: 100 }).subscribe({ // Fetch all for now
             next: (response) => {
                 this.courts = response.courts || [];
+                // Prefetch primary images for courts that have image IDs
+                this.prefetchCourtImages();
                 this.isLoading = false;
                 this.error = '';
                 this.cdr.detectChanges(); // Trigger change detection
@@ -111,11 +117,39 @@ export class CourtListComponent implements OnInit {
     }
 
     getCourtImage(court: Court): string {
+        // Prefer cached primary image loaded from image API
+        const cached = this.courtImageCache[court.courtId];
+        if (cached) {
+            return cached;
+        }
+
+        // Fallback: use legacy images field if available (e.g. seeded URLs)
         if (court.images && court.images.length > 0) {
             return court.images[0];
         }
+
         // Default placeholder image
         return 'assets/images/index.jpg';
+    }
+
+    private prefetchCourtImages(): void {
+        this.courts.forEach(court => {
+            if (court.courtImageIds && court.courtImageIds.length > 0) {
+                this.courtService.getCourtImages(court.courtId).subscribe({
+                    next: (images) => {
+                        if (images && images.length > 0) {
+                            const img = images[0];
+                            this.courtImageCache[court.courtId] = `data:${img.contentType};base64,${img.data}`;
+                            this.cdr.detectChanges();
+                        }
+                    },
+                    error: (err) => {
+                        console.error('Failed to load court images', err);
+                        // Không chặn UI nếu ảnh lỗi
+                    }
+                });
+            }
+        });
     }
 
     getLocation(court: Court): string {

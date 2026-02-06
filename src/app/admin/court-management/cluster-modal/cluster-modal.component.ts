@@ -33,6 +33,9 @@ export class ClusterModalComponent implements OnInit {
     isLoading = false;
     error = '';
 
+    selectedImageFile: File | null = null;
+    imagePreviewUrl: string | null = null;
+
     ngOnInit(): void {
         this.loadManagers();
         // Initialize form with cluster data if editing
@@ -75,6 +78,25 @@ export class ClusterModalComponent implements OnInit {
         });
     }
 
+    onImageSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        if (!input.files || input.files.length === 0) {
+            this.selectedImageFile = null;
+            this.imagePreviewUrl = null;
+            return;
+        }
+
+        const file = input.files[0];
+        this.selectedImageFile = file;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            this.imagePreviewUrl = reader.result as string;
+            this.cdr.detectChanges();
+        };
+        reader.readAsDataURL(file);
+    }
+
     save(): void {
         if (this.form.invalid) {
             // Mark all fields as touched to show validation errors
@@ -108,14 +130,33 @@ export class ClusterModalComponent implements OnInit {
             };
             this.courtService.updateCourtGroup(this.cluster.courtGroupId, updated).subscribe({
                 next: () => {
-                    this.isLoading = false;
-                    this.cdr.detectChanges(); // Update UI first
-                    // Show toast and close modal
-                    this.toastService.success('Cập nhật cụm sân thành công!', 'Thành công');
-                    // Use setTimeout to ensure toast is rendered before closing modal
-                    setTimeout(() => {
-                        this.activeModal.close('saved');
-                    }, 300);
+                    // Nếu có chọn ảnh mới thì upload sau khi cập nhật thông tin
+                    if (this.selectedImageFile) {
+                        this.courtService.uploadCourtGroupImage(this.cluster!.courtGroupId, this.selectedImageFile).subscribe({
+                            next: () => {
+                                this.isLoading = false;
+                                this.cdr.detectChanges();
+                                this.toastService.success('Cập nhật cụm sân và ảnh thành công!', 'Thành công');
+                                setTimeout(() => {
+                                    this.activeModal.close('saved');
+                                }, 300);
+                            },
+                            error: (err) => {
+                                const errorMsg = this.apiService.extractErrorMessage(err) || 'Đã lưu thông tin cụm sân nhưng không thể lưu ảnh.';
+                                this.error = errorMsg;
+                                this.toastService.error(errorMsg, 'Lỗi lưu ảnh');
+                                this.isLoading = false;
+                                this.cdr.detectChanges();
+                            }
+                        });
+                    } else {
+                        this.isLoading = false;
+                        this.cdr.detectChanges(); // Update UI first
+                        this.toastService.success('Cập nhật cụm sân thành công!', 'Thành công');
+                        setTimeout(() => {
+                            this.activeModal.close('saved');
+                        }, 300);
+                    }
                 },
                 error: (err) => {
                     const errorMsg = this.apiService.extractErrorMessage(err) || 'Không thể cập nhật cụm sân. Vui lòng thử lại sau.';
@@ -137,15 +178,34 @@ export class ClusterModalComponent implements OnInit {
                 managerId: value.managerId || undefined
             };
             this.courtService.createCourtGroup(newGroup).subscribe({
-                next: () => {
-                    this.isLoading = false;
-                    this.cdr.detectChanges(); // Update UI first
-                    // Show toast and close modal
-                    this.toastService.success('Tạo cụm sân thành công!', 'Thành công');
-                    // Use setTimeout to ensure toast is rendered before closing modal
-                    setTimeout(() => {
-                        this.activeModal.close('saved');
-                    }, 300);
+                next: (created) => {
+                    // Nếu có chọn ảnh thì upload sau khi tạo cụm sân
+                    if (this.selectedImageFile && created && created.courtGroupId) {
+                        this.courtService.uploadCourtGroupImage(created.courtGroupId, this.selectedImageFile).subscribe({
+                            next: () => {
+                                this.isLoading = false;
+                                this.cdr.detectChanges();
+                                this.toastService.success('Tạo cụm sân và ảnh thành công!', 'Thành công');
+                                setTimeout(() => {
+                                    this.activeModal.close('saved');
+                                }, 300);
+                            },
+                            error: (err) => {
+                                const errorMsg = this.apiService.extractErrorMessage(err) || 'Đã tạo cụm sân nhưng không thể lưu ảnh.';
+                                this.error = errorMsg;
+                                this.toastService.error(errorMsg, 'Lỗi lưu ảnh');
+                                this.isLoading = false;
+                                this.cdr.detectChanges();
+                            }
+                        });
+                    } else {
+                        this.isLoading = false;
+                        this.cdr.detectChanges(); // Update UI first
+                        this.toastService.success('Tạo cụm sân thành công!', 'Thành công');
+                        setTimeout(() => {
+                            this.activeModal.close('saved');
+                        }, 300);
+                    }
                 },
                 error: (err) => {
                     const errorMsg = this.apiService.extractErrorMessage(err) || 'Không thể tạo cụm sân. Vui lòng thử lại sau.';

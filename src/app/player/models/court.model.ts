@@ -8,7 +8,22 @@ export interface Court {
   city?: string;
   pricePerHour: number;
   status: CourtStatus;
+  /**
+   * Legacy images array (e.g. URLs/string from backend `images` field).
+   */
   images?: string[];
+  /**
+   * Image IDs stored in `court_images` table.
+   */
+  courtImageIds?: number[];
+  /**
+   * Image IDs stored in `court_group_images` table for the court's group.
+   */
+  courtGroupImageIds?: number[];
+  /**
+   * Convenience field on FE for primary image data URL.
+   */
+  primaryImageDataUrl?: string;
   description?: string;
   amenities?: string[];
   phone?: string;
@@ -40,6 +55,14 @@ export interface CourtGroup {
   city: string;
   description?: string;
   managerId?: number;
+  /**
+   * Image IDs stored in `court_group_images` table.
+   */
+  imageIds?: number[];
+  /**
+   * Convenience field on FE for primary image data URL.
+   */
+  primaryImageDataUrl?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -78,6 +101,16 @@ export interface CourtSearchResponse {
   page: number;
   pageSize: number;
   totalPages: number;
+}
+
+export interface CourtImageData {
+  imageId: number;
+  fileName: string;
+  contentType: string;
+  /**
+   * Base64-encoded image data (from backend ImageDTO.data).
+   */
+  data: string;
 }
 
 export interface CourtDetail extends Court {

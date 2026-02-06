@@ -1,7 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { Court, CourtSearchRequest, CourtSearchResponse, CourtDetail, CourtGroup, TimeSlot, CourtStatus } from '../models/court.model';
+import {
+  Court,
+  CourtSearchRequest,
+  CourtSearchResponse,
+  CourtDetail,
+  CourtGroup,
+  TimeSlot,
+  CourtStatus,
+  CourtImageData
+} from '../models/court.model';
 import { ApiService } from '../../common/api.service';
 
 @Injectable({
@@ -213,6 +222,7 @@ export class CourtService {
       city: dto.city || '',
       description: dto.description || '',
       managerId: dto.managerId || dto.manager_id || undefined,
+      imageIds: dto.imageIds || dto.image_ids || [],
       createdAt: dto.createdAt ? new Date(dto.createdAt) : undefined,
       updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined
     };
@@ -239,7 +249,7 @@ export class CourtService {
     if (!dto) {
       throw new Error('Invalid court data');
     }
-    return {
+    const court: Court = {
       courtId: dto.courtId || dto.court_id || 0,
       courtName: dto.courtName || dto.court_name || '',
       courtGroupId: dto.courtGroupId || dto.court_group_id || 0,
@@ -250,6 +260,8 @@ export class CourtService {
       pricePerHour: dto.basePricePerHour ? Number(dto.basePricePerHour) : (dto.pricePerHour ? Number(dto.pricePerHour) : 0), // Backend dùng basePricePerHour
       status: dto.status as CourtStatus || CourtStatus.AVAILABLE,
       images: dto.images ? (Array.isArray(dto.images) ? dto.images : [dto.images]) : [],
+      courtImageIds: dto.courtImageIds || dto.court_image_ids || [],
+      courtGroupImageIds: dto.courtGroupImageIds || dto.court_group_image_ids || [],
       description: dto.description || '',
       amenities: dto.amenities || [],
       phone: dto.phone || '',
@@ -258,6 +270,7 @@ export class CourtService {
       createdAt: dto.createdAt ? new Date(dto.createdAt) : undefined,
       updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined
     };
+    return court;
   }
 
   /**
@@ -270,6 +283,48 @@ export class CourtService {
       status: court.status,
       basePricePerHour: court.pricePerHour // Frontend dùng pricePerHour, backend expect basePricePerHour
     };
+  }
+
+  // --- Image APIs ---
+
+  getCourtImages(courtId: number): Observable<CourtImageData[]> {
+    return this.apiService.get<CourtImageData[]>(`courts/${courtId}/images`).pipe(
+      catchError(error => {
+        console.error('Error loading court images:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  getCourtGroupImages(courtGroupId: number): Observable<CourtImageData[]> {
+    return this.apiService.get<CourtImageData[]>(`courts/groups/${courtGroupId}/images`).pipe(
+      catchError(error => {
+        console.error('Error loading court group images:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  uploadCourtImage(courtId: number, file: File): Observable<number[]> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.apiService.post<number[]>(`courts/${courtId}/images`, formData).pipe(
+      catchError(error => {
+        console.error('Error uploading court image:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  uploadCourtGroupImage(courtGroupId: number, file: File): Observable<number[]> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.apiService.post<number[]>(`courts/groups/${courtGroupId}/images`, formData).pipe(
+      catchError(error => {
+        console.error('Error uploading court group image:', error);
+        return throwError(() => error);
+      })
+    );
   }
 
   /**
