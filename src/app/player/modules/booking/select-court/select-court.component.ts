@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CardComponent } from '../../../../theme/shared/components/card/card.component';
 import { IconService, IconDirective } from '@ant-design/icons-angular';
@@ -45,11 +45,12 @@ export class SelectCourtComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private apiService = inject(ApiService);
   private cdr = inject(ChangeDetectorRef);
-  
+  private route = inject(ActivatedRoute);
+
   // Booking Timer
   bookingTimerState$ = this.bookingTimerService.getTimerState();
   bookingTimerState = this.bookingTimerService.getCurrentState();
-  
+
   // Current user
   currentUserId: number | null = null;
 
@@ -61,11 +62,11 @@ export class SelectCourtComponent implements OnInit, OnDestroy {
   selectedSlots: string[] = []; // Array of start times e.g. "05:00", "05:30"
 
   // UI Data
-  timeSlots: { 
-    time: string; 
-    endTime: string; 
-    available: boolean; 
-    selected: boolean; 
+  timeSlots: {
+    time: string;
+    endTime: string;
+    available: boolean;
+    selected: boolean;
     price?: number;
     slotId?: number;
     locked?: boolean;
@@ -106,7 +107,7 @@ export class SelectCourtComponent implements OnInit, OnDestroy {
     this.bookingTimerState$.subscribe(state => {
       this.bookingTimerState = state;
       this.cdr.detectChanges();
-      
+
       // If timer expired, show error and reload slots
       if (!state.isActive && state.reservedSlotIds.length > 0) {
         this.error = 'Thời gian đặt sân đã hết. Các khung giờ đã được giải phóng. Vui lòng chọn lại.';
@@ -119,38 +120,81 @@ export class SelectCourtComponent implements OnInit, OnDestroy {
       }
     });
 
+    // Check for query params if state is missing
+    const courtId = this.route.snapshot.queryParamMap.get('courtId');
+    const dateParam = this.route.snapshot.queryParamMap.get('date');
+    const startTimeParam = this.route.snapshot.queryParamMap.get('startTime');
+    const endTimeParam = this.route.snapshot.queryParamMap.get('endTime');
+
     if (nav.selectedCourt) {
-      this.selectedCourt = nav.selectedCourt;
+      this.setupBooking(nav.selectedCourt, nav.bookingDate, nav.startTime, nav.endTime, nav.reservedSlotIds);
+    } else if (courtId) {
+      // Load court from ID
+      this.isLoading = true;
+      this.courtService.getCourtById(+courtId).subscribe({
+        next: (courtDetail) => {
+          // Map to Court model (similar to DetailComponent) - simplified mapping
+          // Note: Ideally extraction of mapping logic to a service/helper
+          const detail = courtDetail as any;
+          const court: Court = {
+            courtId: courtDetail.courtId,
+            courtName: courtDetail.courtName,
+            courtGroupId: courtDetail.courtGroupId,
+            courtGroupName: detail.courtGroupName || '',
+            location: detail.address || '',
+            district: detail.district || '',
+            city: detail.city || '',
+            pricePerHour: typeof detail.basePricePerHour === 'number'
+              ? detail.basePricePerHour
+              : (detail.basePricePerHour?.toNumber?.() || courtDetail.pricePerHour || 0),
+            status: courtDetail.status,
+            images: [], // Not critical for this view
+            description: detail.description || '',
+            amenities: [],
+            phone: '',
+            rating: detail.averageRating || 0,
+            reviewCount: 0
+          };
 
-      // Auto-prefill date from Search if available
-      if (nav.bookingDate) {
-        this.selectedDate = nav.bookingDate;
-      }
-
-      // Kiểm tra xem có timer đang chạy không
-      const currentState = this.bookingTimerService.getCurrentState();
-      
-      // Nếu timer chưa chạy hoặc đã hết hạn, start timer mới
-      if (!currentState.isActive) {
-        this.bookingTimerService.stopTimer(); // Stop timer cũ nếu có
-        this.bookingTimerService.startTimer([]); // Start timer mới
-      } else {
-        // Timer đang chạy, restore reserved slots nếu có
-        if (nav.reservedSlotIds && nav.reservedSlotIds.length > 0) {
-          this.reservedSlotIds = [...nav.reservedSlotIds];
-          this.bookingTimerService.updateReservedSlots([...this.reservedSlotIds]);
-        } else if (currentState.reservedSlotIds.length > 0) {
-          // Restore từ timer state nếu có
-          this.reservedSlotIds = [...currentState.reservedSlotIds];
+          this.setupBooking(court, dateParam, startTimeParam, endTimeParam);
+        },
+        error: (err) => {
+          console.error('Error loading court:', err);
+          this.error = 'Không thể tải thông tin sân. Vui lòng thử lại.';
+          this.isLoading = false;
         }
-      }
-
-      // Load slots (and pre-select if start/end time exists)
-      this.generateTimeSlots(nav.startTime, nav.endTime);
+      });
     } else {
-      console.warn('No selectedCourt in state, redirecting...');
+      console.warn('No selectedCourt in state or query params, redirecting...');
       this.router.navigate(['/player/court-search']);
     }
+  }
+
+  setupBooking(court: Court, date?: string | null, startTime?: string | null, endTime?: string | null, reservedSlotIds?: number[]): void {
+    this.selectedCourt = court;
+
+    // Auto-prefill date
+    if (date) {
+      this.selectedDate = date;
+    }
+
+    // Check/Start Timer
+    const currentState = this.bookingTimerService.getCurrentState();
+
+    if (!currentState.isActive) {
+      this.bookingTimerService.stopTimer();
+      this.bookingTimerService.startTimer([]);
+    } else {
+      if (reservedSlotIds && reservedSlotIds.length > 0) {
+        this.reservedSlotIds = [...reservedSlotIds];
+        this.bookingTimerService.updateReservedSlots([...this.reservedSlotIds]);
+      } else if (currentState.reservedSlotIds.length > 0) {
+        this.reservedSlotIds = [...currentState.reservedSlotIds];
+      }
+    }
+
+    // Load slots
+    this.generateTimeSlots(startTime || undefined, endTime || undefined);
   }
 
   getTodayDate(): string {
@@ -198,13 +242,13 @@ export class SelectCourtComponent implements OnInit, OnDestroy {
             const availableValue = (s as any).available !== undefined ? (s as any).available : s.isAvailable;
             const isLocked = s.isLocked || (s as any).isLocked || false;
             const lockedByUserId = s.lockedByUserId || (s as any).lockedByUserId;
-            
+
             // Slot không available nếu:
             // 1. Không available (đã được đặt)
             // 2. Bị lock bởi user khác
             const isLockedByOtherUser = isLocked && lockedByUserId && lockedByUserId !== this.currentUserId;
             const finalAvailable = availableValue && !isLockedByOtherUser;
-            
+
             return {
               time: timeValue,
               endTime: s.endTime || '',
@@ -305,10 +349,10 @@ export class SelectCourtComponent implements OnInit, OnDestroy {
         slot.isLockedByMe = true;
         slot.lockedByUserId = this.currentUserId || undefined;
         this.reservedSlotIds.push(slot.slotId);
-        
+
         // Update booking timer with all reserved slots (timer đã start từ khi vào step 1)
         this.bookingTimerService.updateReservedSlots([...this.reservedSlotIds]);
-        
+
         this.isReserving = false;
         this.cdr.detectChanges();
       },
@@ -337,10 +381,10 @@ export class SelectCourtComponent implements OnInit, OnDestroy {
           slot.isLockedByMe = false;
           slot.lockedByUserId = undefined;
         }
-        
+
         // Update booking timer
         this.bookingTimerService.updateReservedSlots([...this.reservedSlotIds]);
-        
+
         this.cdr.detectChanges();
       },
       error: (error) => {
@@ -462,7 +506,7 @@ export class SelectCourtComponent implements OnInit, OnDestroy {
       }
     });
   }
-  
+
   getBookingTimerText(): string {
     return this.bookingTimerService.formatTime(this.bookingTimerState.remainingSeconds);
   }

@@ -97,11 +97,11 @@ export class LoginComponent {
           if (user.role === UserRole.ADMIN || user.role === UserRole.COURT_MANAGER) {
             // Admin/Manager should go to admin site
             const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/admin/dashboard';
-            this.router.navigate([returnUrl]);
+            this.router.navigateByUrl(returnUrl);
           } else {
             // Customer goes to player site
             const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/player';
-            this.router.navigate([returnUrl]);
+            this.router.navigateByUrl(returnUrl);
           }
         },
         error: (error) => {

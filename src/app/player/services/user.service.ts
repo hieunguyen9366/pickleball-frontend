@@ -8,7 +8,7 @@ import { ApiService } from '../../common/api.service';
     providedIn: 'root'
 })
 export class UserService {
-    constructor(private apiService: ApiService) {}
+    constructor(private apiService: ApiService) { }
 
     getUsersByRole(role: UserRole): Observable<User[]> {
         return this.apiService.get<User[]>('users', {
@@ -22,7 +22,9 @@ export class UserService {
     }
 
     createUser(user: User): Observable<User> {
-        return this.apiService.post<User>('users', user).pipe(
+        return this.apiService.post<User>('users', user, {
+            params: { role: user.role }
+        }).pipe(
             catchError(error => {
                 console.error('Error creating user:', error);
                 return throwError(() => error);

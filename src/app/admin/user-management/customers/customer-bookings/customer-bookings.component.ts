@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { CardComponent } from '../../../../theme/shared/components/card/card.component';
@@ -25,6 +25,7 @@ export class CustomerBookingsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private iconService = inject(IconService);
   private apiService = inject(ApiService);
+  private cd = inject(ChangeDetectorRef);
 
   customer: User | null = null;
   bookings: Booking[] = [];
@@ -52,6 +53,7 @@ export class CustomerBookingsComponent implements OnInit {
         if (!this.customer) {
           this.error = 'Không tìm thấy khách hàng.';
         }
+        this.cd.detectChanges();
       },
       error: (err: HttpErrorResponse) => {
         console.error('Error loading customer:', err);
@@ -70,6 +72,7 @@ export class CustomerBookingsComponent implements OnInit {
       next: (response) => {
         this.bookings = response.bookings || [];
         this.isLoading = false;
+        this.cd.detectChanges();
       },
       error: (err: HttpErrorResponse) => {
         console.error('Error loading bookings:', err);

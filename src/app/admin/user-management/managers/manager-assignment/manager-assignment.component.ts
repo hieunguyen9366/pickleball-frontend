@@ -4,8 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CardComponent } from '../../../../theme/shared/components/card/card.component';
 import { IconDirective, IconService } from '@ant-design/icons-angular';
-import { CheckOutline, CloseOutline, SaveOutline } from '@ant-design/icons-angular/icons';
+import { CheckOutline, CloseOutline, SaveOutline, EnvironmentOutline } from '@ant-design/icons-angular/icons';
 import { PermissionService } from '../../../services/permission.service';
+import { UserService } from '../../../../player/services/user.service';
+import { ToastService } from '../../../../common/services/toast.service';
 import { ManagerCourtGroupsResponse } from '../../../models/permission.model';
 import { CourtGroup } from '../../../../player/models/court.model';
 import { ApiService } from '../../../../common/api.service';
@@ -20,25 +22,29 @@ import { HttpErrorResponse } from '@angular/common/http';
 })
 export class ManagerAssignmentComponent implements OnInit {
   private permissionService = inject(PermissionService);
+  private userService = inject(UserService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef);
   private iconService = inject(IconService);
   private apiService = inject(ApiService);
+  private toastService = inject(ToastService);
 
   managerId!: number;
+
   data: ManagerCourtGroupsResponse | null = null;
+  managerInfo: any = null; // Store full user details
   isLoading = false;
   error = '';
   selectedGroupIds: number[] = [];
 
   constructor() {
-    this.iconService.addIcon(CheckOutline, CloseOutline, SaveOutline);
+    this.iconService.addIcon(CheckOutline, CloseOutline, SaveOutline, EnvironmentOutline);
   }
 
   ngOnInit(): void {
     window.scrollTo({ top: 0, behavior: 'auto' });
-    
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.managerId = +id;
@@ -63,8 +69,8 @@ export class ManagerAssignmentComponent implements OnInit {
       error: (err: HttpErrorResponse) => {
         console.error('Error loading manager assignment:', err);
         // Sử dụng ApiService.extractErrorMessage() để thống nhất
-        this.error = this.apiService.extractErrorMessage(err) || 
-                    'Không thể tải thông tin phân quyền. Vui lòng thử lại sau.';
+        this.error = this.apiService.extractErrorMessage(err) ||
+          'Không thể tải thông tin phân quyền. Vui lòng thử lại sau.';
         this.isLoading = false;
         this.cdr.detectChanges();
       }
@@ -95,14 +101,17 @@ export class ManagerAssignmentComponent implements OnInit {
       courtGroupIds: this.selectedGroupIds
     }).subscribe({
       next: () => {
+        this.toastService.success('Cập nhật phân quyền thành công');
         // Reload data
         this.loadData();
       },
       error: (err: HttpErrorResponse) => {
         console.error('Error saving assignment:', err);
         // Sử dụng ApiService.extractErrorMessage() để thống nhất
-        this.error = this.apiService.extractErrorMessage(err) || 
-                    'Không thể lưu phân quyền. Vui lòng thử lại sau.';
+        const errorMsg = this.apiService.extractErrorMessage(err) ||
+          'Không thể lưu phân quyền. Vui lòng thử lại sau.';
+        this.error = errorMsg;
+        this.toastService.error(errorMsg);
         this.isLoading = false;
         this.cdr.detectChanges();
       }

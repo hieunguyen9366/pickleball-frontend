@@ -28,7 +28,7 @@ export interface AssignCourtGroupsRequest {
  * Response khi lấy danh sách cụm sân của một quản lý
  */
 export interface ManagerCourtGroupsResponse {
-  manager: User;
+  managerName: string;
   assignedCourtGroups: CourtGroup[];
   availableCourtGroups: CourtGroup[]; // Các cụm sân chưa được gán
 }

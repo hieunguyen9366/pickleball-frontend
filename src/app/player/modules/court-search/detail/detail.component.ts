@@ -177,6 +177,12 @@ export class DetailComponent implements OnInit {
     const endTime = params.get('endTime');
 
     this.router.navigate(['/player/booking/select-court'], {
+      queryParams: {
+        courtId: this.court.courtId,
+        date: bookingDate,
+        startTime,
+        endTime
+      },
       state: {
         selectedCourt: this.court,
         bookingDate,
